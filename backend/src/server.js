@@ -26,6 +26,54 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serverless auto-initialization guard for Neon DB
+let isDbReady = false;
+let dbInitPromise = null;
+
+async function checkAndInitDb() {
+  if (isDbReady) return;
+  if (!dbInitPromise) {
+    dbInitPromise = (async () => {
+      try {
+        const check = await query(`SELECT to_regclass('public.users') as exists`);
+        if (!check.rows[0]?.exists) {
+          console.log('🔄 First run detected: Initializing Neon DB schema and seed data...');
+          await setupNeonDatabase();
+          await seedInitialData();
+          console.log('✅ Neon DB auto-initialized successfully!');
+        }
+        isDbReady = true;
+      } catch (err) {
+        console.warn('⚠️ DB Schema check warning:', err.message);
+        dbInitPromise = null; // allow retry
+      }
+    })();
+  }
+  return dbInitPromise;
+}
+
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    try {
+      await checkAndInitDb();
+    } catch (e) {
+      // Continue anyway; individual queries will handle reporting if DB down
+    }
+  }
+  next();
+});
+
+// Manual setup endpoint if ever needed
+app.get('/api/setup-db', async (req, res) => {
+  try {
+    await setupNeonDatabase();
+    await seedInitialData();
+    res.json({ success: true, message: 'Neon DB schema and seed data initialized successfully!' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Health & System status check
 app.get('/health', async (req, res) => {
   try {
