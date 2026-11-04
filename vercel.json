@@ -9,11 +9,5 @@
       "source": "/(.*)",
       "destination": "/web/$1"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/reminders/cron",
-      "schedule": "* * * * *"
-    }
   ]
 }
