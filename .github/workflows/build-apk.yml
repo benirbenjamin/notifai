@@ -41,7 +41,7 @@ jobs:
         run: |
           cd mobile/android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m" --stacktrace
 
       - name: 📤 Upload Installable APK Artifact
         uses: actions/upload-artifact@v4

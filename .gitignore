@@ -20,6 +20,8 @@ build/
 .output/
 
 # Expo & Mobile
+mobile/android/
+mobile/ios/
 .expo/
 .expo-shared/
 *.jks

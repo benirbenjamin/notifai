@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Notifai space - Smart Activity & Task Management with Neon DB, Flutterwave, React, and React Native",
   "scripts": {
-    "build": "cd web && npm install && npm run build",
+    "build": "cd web && npm install --include=dev && npm run build",
     "start": "node backend/src/server.js",
     "dev:backend": "cd backend && npm start",
     "dev:web": "cd web && npm run dev",
@@ -24,6 +24,7 @@
     "nodemailer": "^6.10.0",
     "pg": "^8.13.1",
     "uuid": "^11.0.5",
+    "vite": "^6.1.0",
     "web-push": "^3.6.7"
   },
   "keywords": [
