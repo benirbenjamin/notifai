@@ -115,3 +115,4 @@ npm start
    - Pricing for **1 Month, 3 Months, 6 Months, and 12 Months**.
 2. When users subscribe, Flutterwave opens the secure payment checkout.
 3. Upon completion, the task creation quota is immediately upgraded, and a receipt email is sent to the user.
+# notifai
