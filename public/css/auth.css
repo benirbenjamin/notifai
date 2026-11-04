@@ -1,0 +1,194 @@
+/* ================================
+   GOOGLE AUTHENTICATION STYLES
+   ================================ */
+
+.btn-google {
+  background-color: #4285f4;
+  border-color: #4285f4;
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-google:hover {
+  background-color: #3367d6;
+  border-color: #3367d6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.btn-google:focus {
+  background-color: #3367d6;
+  border-color: #3367d6;
+  color: white;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+}
+
+.btn-google:active {
+  background-color: #2955c5;
+  border-color: #2955c5;
+  color: white;
+  transform: translateY(0);
+}
+
+.btn-google.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+/* Authentication Container Styles */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Admin Login Specific Background */
+.auth-body:has(.auth-card h1:contains("Admin")) .auth-container {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+.auth-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Admin Login Card Styling */
+.auth-card:has(h1:contains("Admin")) {
+  border-top: 4px solid #e74c3c;
+  box-shadow: 0 20px 25px -5px rgba(231, 76, 60, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Auth Logo */
+.auth-logo {
+  max-width: 80px;
+  height: auto;
+}
+
+/* Auth Footer */
+.auth-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 1rem 0;
+  z-index: 1000;
+}
+
+/* Admin Badge in Forms */
+.admin-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+/* Input Focus States for Admin */
+.auth-card:has(h1:contains("Admin")) .form-control:focus {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+}
+
+/* Admin Login Button */
+.auth-card:has(h1:contains("Admin")) .btn-primary {
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  border-color: #e74c3c;
+  font-weight: 600;
+}
+
+.auth-card:has(h1:contains("Admin")) .btn-primary:hover {
+  background: linear-gradient(45deg, #c0392b, #a93226);
+  border-color: #c0392b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.profile-completion-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 0;
+}
+
+.completion-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+/* Input Group Customization for Profile Form */
+.input-group .form-select {
+  border-right: none;
+}
+
+.input-group .form-control {
+  border-left: none;
+}
+
+.input-group .form-select:focus {
+  z-index: 3;
+}
+
+/* Form Check Spacing */
+.form-check {
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .auth-card,
+  .completion-card {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+  
+  .btn-google.btn-lg {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}

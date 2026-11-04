@@ -1,0 +1,217 @@
+<%- include('../partials/header') %>
+
+<div class="profile-completion-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="completion-card">
+          <div class="text-center mb-4">
+            <div class="avatar-lg mx-auto mb-3">
+              <% if (user.google_avatar) { %>
+                <img src="<%= user.google_avatar %>" alt="Profile" class="avatar-img">
+              <% } else { %>
+                <div class="avatar-circle bg-primary">
+                  <%= user.first_name.charAt(0) %><%= user.last_name.charAt(0) %>
+                </div>
+              <% } %>
+            </div>
+            <h1 class="h3 mb-2">Complete Your Profile</h1>
+            <p class="text-muted">Welcome <%= user.first_name %>! Let's set up your account with some additional information.</p>
+          </div>
+
+          <form action="/auth/complete-profile" method="POST" id="profileCompletionForm">
+            <!-- Phone Number -->
+            <div class="mb-3">
+              <label for="phone" class="form-label">
+                <i class="fab fa-whatsapp text-success me-2"></i>WhatsApp Phone Number
+              </label>
+              <div class="input-group">
+                <select class="form-select" style="max-width: 120px;" name="country_code" required>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+86">🇨🇳 +86</option>
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+234" selected>🇳🇬 +234</option>
+                  <option value="+27">🇿🇦 +27</option>
+                  <option value="+20">🇪🇬 +20</option>
+                  <option value="+213">🇩🇿 +213</option>
+                  <option value="+212">🇲🇦 +212</option>
+                  <option value="+216">🇹🇳 +216</option>
+                </select>
+                <input type="tel" class="form-control" id="phone" name="phone" 
+                       placeholder="8012345678" pattern="[0-9]{10,15}" required>
+              </div>
+              <small class="form-text text-muted">
+                We'll use this for important notifications and collaboration invites
+              </small>
+            </div>
+
+            <!-- Timezone -->
+            <div class="mb-3">
+              <label for="timezone" class="form-label">
+                <i class="fas fa-clock me-2"></i>Timezone
+              </label>
+              <select class="form-select" id="timezone" name="timezone" required>
+                <option value="">Select your timezone</option>
+                <option value="America/New_York">Eastern Time (ET)</option>
+                <option value="America/Chicago">Central Time (CT)</option>
+                <option value="America/Denver">Mountain Time (MT)</option>
+                <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                <option value="Europe/London">London (GMT)</option>
+                <option value="Europe/Paris">Paris (CET)</option>
+                <option value="Europe/Berlin">Berlin (CET)</option>
+                <option value="Asia/Tokyo">Tokyo (JST)</option>
+                <option value="Asia/Shanghai">Shanghai (CST)</option>
+                <option value="Asia/Kolkata">India (IST)</option>
+                <option value="Africa/Lagos" selected>Lagos (WAT)</option>
+                <option value="Africa/Cairo">Cairo (EET)</option>
+                <option value="Africa/Johannesburg">Johannesburg (SAST)</option>
+              </select>
+            </div>
+
+            <!-- Notification Preferences -->
+            <div class="mb-4">
+              <label class="form-label">
+                <i class="fas fa-bell me-2"></i>Notification Preferences
+              </label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" checked>
+                <label class="form-check-label" for="email_notifications">
+                  Email notifications for activities and collaborations
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sms_notifications" name="sms_notifications">
+                <label class="form-check-label" for="sms_notifications">
+                  SMS notifications for urgent reminders (requires phone verification)
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="push_notifications" name="push_notifications" checked>
+                <label class="form-check-label" for="push_notifications">
+                  Browser push notifications
+                </label>
+              </div>
+            </div>
+
+            <!-- Optional: Company/Organization -->
+            <div class="mb-3">
+              <label for="company" class="form-label">
+                <i class="fas fa-building me-2"></i>Company/Organization (Optional)
+              </label>
+              <input type="text" class="form-control" id="company" name="company" 
+                     placeholder="Your company or organization">
+            </div>
+
+            <!-- Role/Job Title -->
+            <div class="mb-4">
+              <label for="job_title" class="form-label">
+                <i class="fas fa-user-tie me-2"></i>Role/Job Title (Optional)
+              </label>
+              <input type="text" class="form-control" id="job_title" name="job_title" 
+                     placeholder="e.g., Project Manager, Developer, Student">
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-check me-2"></i>Complete Setup
+              </button>
+            </div>
+          </form>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">
+              You can update these preferences later in your account settings
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.profile-completion-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 0;
+}
+
+.completion-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.form-check {
+  margin-bottom: 0.5rem;
+}
+
+.input-group .form-select {
+  border-right: none;
+}
+
+.input-group .form-control {
+  border-left: none;
+}
+
+.input-group .form-select:focus {
+  z-index: 3;
+}
+</style>
+
+<script>
+document.getElementById('profileCompletionForm').addEventListener('submit', function(e) {
+  const phone = document.getElementById('phone').value;
+  const phoneRegex = /^[0-9]{10,15}$/;
+  
+  if (!phoneRegex.test(phone)) {
+    e.preventDefault();
+    alert('Please enter a valid phone number (10-15 digits)');
+    return;
+  }
+});
+
+// Auto-detect timezone
+if (Intl.DateTimeFormat) {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezoneSelect = document.getElementById('timezone');
+  
+  for (let option of timezoneSelect.options) {
+    if (option.value === timezone) {
+      option.selected = true;
+      break;
+    }
+  }
+}
+</script>
+
+<%- include('../partials/footer') %>

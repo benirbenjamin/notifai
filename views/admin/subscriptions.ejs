@@ -1,0 +1,174 @@
+<%- include('../partials/admin-header', { title: 'Subscriptions Management' }) %>
+
+<div class="admin-container">
+    <%- include('../partials/admin-sidebar', { page: 'subscriptions' }) %>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">Subscriptions Management</h1>
+                    <p class="text-muted mb-0">Monitor and manage user subscriptions</p>
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-primary" onclick="exportSubscriptions()">
+                        <i class="bi bi-download me-1"></i>Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscriptions Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-receipt me-2"></i>All Subscriptions
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search subscriptions..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <% if (subscriptions && subscriptions.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="subscriptionsTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Plan</th>
+                                    <th>Amount</th>
+                                    <th>Duration</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Transaction ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% subscriptions.forEach(subscription => { %>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-person text-white small"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-medium"><%= subscription.first_name %> <%= subscription.last_name %></div>
+                                                    <small class="text-muted"><%= subscription.email %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= subscription.plan_id === 1 ? 'secondary' : 'primary' %>">
+                                                <%= subscription.plan_name %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>$<%= subscription.amount %></strong>
+                                        </td>
+                                        <td>
+                                            <%= subscription.duration_months %> months
+                                        </td>
+                                        <td>
+                                            <%= new Date(subscription.start_date).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(subscription.end_date).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= subscription.status === 'active' ? 'success' : subscription.status === 'expired' ? 'warning' : 'danger' %>">
+                                                <%= subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1) %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <% if (subscription.flutterwave_transaction_id) { %>
+                                                <code class="small"><%= subscription.flutterwave_transaction_id.substring(0, 10) %>...</code>
+                                            <% } else { %>
+                                                <span class="text-muted">N/A</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="/admin/users/<%= subscription.user_id %>">
+                                                        <i class="bi bi-person me-2"></i>View User
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="cancelSubscription('<%= subscription.id %>')">
+                                                        <i class="bi bi-x-circle me-2"></i>Cancel
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="bi bi-receipt fs-1 text-muted"></i>
+                        <h5 class="text-muted mt-3">No Subscriptions</h5>
+                        <p class="text-muted">No subscriptions have been created yet.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const tableRows = document.querySelectorAll('#subscriptionsTable tbody tr');
+    
+    tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Export subscriptions
+function exportSubscriptions() {
+    window.location.href = '/admin/subscriptions/export';
+}
+
+// Cancel subscription
+function cancelSubscription(subscriptionId) {
+    if (confirm('Are you sure you want to cancel this subscription?')) {
+        fetch(`/admin/subscriptions/${subscriptionId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error cancelling subscription: ' + error.message);
+        });
+    }
+}
+</script>
+
+<%- include('../partials/admin-footer') %>

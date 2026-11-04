@@ -1,0 +1,30 @@
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="bottom-navigation">
+    <a href="/dashboard" class="bottom-nav-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+        <i class="bi bi-house"></i>
+        <span>Home</span>
+    </a>
+    
+    <a href="/activities" class="bottom-nav-item <%= currentPage === 'activities' ? 'active' : '' %>">
+        <i class="bi bi-list-task"></i>
+        <span>Activities</span>
+    </a>
+    
+    <a href="/activities/create" class="bottom-nav-item <%= currentPage === 'create' ? 'active' : '' %>">
+        <i class="bi bi-plus-circle"></i>
+        <span>Create</span>
+    </a>
+    
+    <a href="/dashboard/analytics" class="bottom-nav-item <%= currentPage === 'analytics' ? 'active' : '' %>">
+        <i class="bi bi-graph-up"></i>
+        <span>Analytics</span>
+    </a>
+    
+    <a href="/dashboard/profile" class="bottom-nav-item <%= currentPage === 'profile' ? 'active' : '' %>">
+        <i class="bi bi-person"></i>
+        <span>Profile</span>
+        <% if (typeof notifications !== 'undefined' && notifications > 0) { %>
+            <span class="badge bg-danger"><%= notifications %></span>
+        <% } %>
+    </a>
+</nav>

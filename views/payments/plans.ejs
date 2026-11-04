@@ -1,0 +1,690 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+          <i class="bi bi-gem me-2"></i>Subscription Plans
+        </h1>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active">Plans</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <% if (typeof query !== 'undefined') { %>
+    <% if (query.success === 'switched_to_free') { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>Successfully switched to the free plan!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } else if (query.success === 'downgraded') { %>
+      <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle me-2"></i>Your subscription has been cancelled and you've been downgraded to the free plan.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } else if (query.error === 'failed_to_switch') { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>Failed to switch to free plan. Please try again.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+  <% } %>
+
+  <!-- Current Plan Status -->
+  <% if (currentPlan) { %>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <h5 class="alert-heading">
+          <i class="bi bi-info-circle me-2"></i>Current Plan
+        </h5>
+        <p class="mb-0">
+          You are currently on the <strong><%= currentPlan.name %></strong> plan.
+          <% if (currentPlan.subscription_end) { %>
+            Your subscription will expire on <%= new Date(currentPlan.subscription_end).toLocaleDateString() %>.
+          <% } %>
+        </p>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Currency Selection -->
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title text-center mb-3">
+            <i class="bi bi-currency-exchange me-2"></i>Choose Your Currency
+          </h5>
+          <div class="row">
+            <div class="col-md-6 mx-auto">
+              <select class="form-select" id="currencySelect">
+                <% if (typeof currencyData !== 'undefined' && currencyData && Object.keys(currencyData).length > 0) { %>
+                  <% Object.entries(currencyData).forEach(([code, data]) => { %>
+                    <option value="<%= code %>" <%= code === 'USD' ? 'selected' : '' %>>
+                      <%= data.name %> (<%= data.symbol %>) - <%= data.formatted %>
+                    </option>
+                  <% }); %>
+                <% } else { %>
+                  <!-- Fallback currencies that match backend validation -->
+                  <option value="USD" selected>US Dollar ($) - $10.00</option>
+                  <option value="NGN">Nigerian Naira (₦) - ₦15,000</option>
+                  <option value="KES">Kenyan Shilling (KSh) - KSh1,300</option>
+                  <option value="UGX">Ugandan Shilling (USh) - USh37,000</option>
+                  <option value="RWF">Rwandan Franc (RWF) - RWF13,000</option>
+                  <option value="GHS">Ghanaian Cedi (₵) - ₵120</option>
+                  <option value="ZAR">South African Rand (R) - R180</option>
+                  <option value="EUR">Euro (€) - €8.50</option>
+                  <option value="GBP">British Pound (£) - £7.30</option>
+                <% } %>
+              </select>
+              <small class="form-text text-muted text-center d-block mt-2">
+                <i class="bi bi-info-circle me-1"></i>
+                Prices are converted in real-time using current exchange rates
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plans Grid -->
+  <div class="row justify-content-center">
+    <% plans.forEach(plan => { %>
+    <div class="col-md-6 col-lg-5 mb-4">
+      <div class="card h-100 <%= currentPlan && currentPlan.plan_id === plan.id ? 'border-primary' : '' %>">
+        <div class="card-header text-center">
+          <h3 class="card-title mb-0"><%= plan.name %></h3>
+          <% if (currentPlan && currentPlan.plan_id === plan.id) { %>
+            <span class="badge bg-primary mt-2">Current Plan</span>
+          <% } %>
+        </div>
+        
+        <div class="card-body text-center">
+          <div class="display-4 fw-bold text-primary mb-3">
+            <% if (plan.price == 0) { %>
+              <span class="plan-price">Free</span>
+            <% } else { %>
+              <span class="plan-price" data-base-price="<%= plan.price %>">$<%= plan.price %></span>
+              <% if (plan.is_lifetime) { %>
+                <small class="text-muted fs-6">one-time</small>
+              <% } else { %>
+                <small class="text-muted fs-6">/month</small>
+              <% } %>
+            <% } %>
+          </div>
+          
+          <p class="text-muted mb-4"><%= plan.description %></p>
+          
+          <ul class="list-unstyled mb-4">
+            <li class="mb-2">
+              <i class="bi bi-check-circle text-success me-2"></i>
+              <%= plan.max_activities >= 999999 ? 'Unlimited' : plan.max_activities %> Activities
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-<%= plan.has_push_notifications ? 'check-circle text-success' : 'x-circle text-muted' %> me-2"></i>
+              Push Notifications
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-<%= plan.has_attachments ? 'check-circle text-success' : 'x-circle text-muted' %> me-2"></i>
+              File Attachments
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-<%= plan.has_recurring_tasks ? 'check-circle text-success' : 'x-circle text-muted' %> me-2"></i>
+              Recurring Tasks
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-<%= plan.has_categories ? 'check-circle text-success' : 'x-circle text-muted' %> me-2"></i>
+              Categories & Tags
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-<%= plan.has_priority_levels ? 'check-circle text-success' : 'x-circle text-muted' %> me-2"></i>
+              Priority Levels
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-<%= plan.has_advanced_progress ? 'check-circle text-success' : 'x-circle text-muted' %> me-2"></i>
+              Advanced Progress Tracking
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <% if (currentPlan && currentPlan.plan_id === plan.id) { %>
+            <button class="btn btn-outline-primary w-100" disabled>
+              <i class="bi bi-check-circle me-2"></i>Current Plan
+            </button>
+          <% } else if (plan.price == 0) { %>
+            <button type="button" class="btn btn-secondary w-100" onclick="switchToFreePlan()">
+              <i class="bi bi-arrow-down-circle me-2"></i>Switch to Free
+            </button>
+          <% } else { %>
+            <button class="btn btn-warning w-100 subscribe-btn fw-bold" 
+                    data-plan-id="<%= plan.id %>" 
+                    data-plan-name="<%= plan.name %>" 
+                    data-plan-price="<%= plan.price %>">
+              <i class="bi bi-gem me-2"></i>
+              <% if (currentPlan && currentPlan.plan_id === 1) { %>
+                <span class="button-text">Get Lifetime Access - $<%= plan.price %></span>
+              <% } else { %>
+                <span class="button-text">Get Lifetime Access</span>
+              <% } %>
+            </button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <!-- Payment Security Notice -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="alert alert-light">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-shield-check text-success me-3 fs-3"></i>
+          <div>
+            <h6 class="mb-1">Secure Payment Processing</h6>
+            <small class="text-muted">
+              All payments are securely processed through Flutterwave. 
+              We don't store your payment information.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Push Notifications -->
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-1">
+              <i class="bi bi-bell me-2"></i>Test Push Notifications
+            </h6>
+            <small class="text-muted">
+              Enable notifications to receive updates about your activities and payments.
+            </small>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="enableNotifications()">
+            <i class="bi bi-bell me-1"></i>Enable Notifications
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal - DISABLED (Direct payment flow now)
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Subscription</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h5 class="mb-3">Subscribe to <span id="modalPlanName"></span></h5>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Duration</label>
+              <select class="form-select" id="duration">
+                <option value="1">1 Month</option>
+                <option value="3">3 Months (Save 5%)</option>
+                <option value="6">6 Months (Save 10%)</option>
+                <option value="12">12 Months (Save 15%)</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Currency</label>
+              <select class="form-select" id="currency">
+                <option value="USD">USD ($)</option>
+                <option value="RWF">RWF (Rwandan Franc)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="card bg-light">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <span>Monthly Price:</span>
+                <span id="monthlyPrice"></span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Duration:</span>
+                <span id="selectedDuration">1 month</span>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Total:</span>
+                <span id="totalPrice"></span>
+              </div>
+              <div class="text-muted small mt-2" id="exchangeInfo" style="display: none;">
+                Exchange rate: <span id="exchangeRate"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-muted small">You will be redirected to Flutterwave for secure payment processing.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmPayment">Proceed to Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+End Modal Comment -->
+
+<!-- Currency Data Script -->
+<script type="application/json" id="currencyData">
+<% if (typeof currencyData !== 'undefined') { %>
+  <%- JSON.stringify(currencyData) %>
+<% } else { %>
+  {}
+<% } %>
+</script>
+
+<script>
+let selectedPlan = null;
+let currentCurrency = 'USD';
+let currencyData = {};
+
+// Load currency data from JSON script
+try {
+  const currencyDataElement = document.getElementById('currencyData');
+  if (currencyDataElement) {
+    currencyData = JSON.parse(currencyDataElement.textContent);
+  }
+} catch (e) {
+  console.warn('Failed to load currency data:', e);
+}
+
+// Currency conversion functions
+async function updatePricing() {
+  const selectedCurrency = document.getElementById('currencySelect').value;
+  currentCurrency = selectedCurrency;
+  
+  console.log('🔄 Updating pricing for currency:', selectedCurrency);
+  
+  // Update plan prices
+  document.querySelectorAll('.plan-price').forEach(async (priceElement) => {
+    const basePrice = parseFloat(priceElement.getAttribute('data-base-price')) || 0;
+    
+    if (basePrice === 0) {
+      priceElement.textContent = 'Free';
+      return;
+    }
+    
+    if (selectedCurrency === 'USD') {
+      priceElement.textContent = `$${basePrice.toFixed(2)}`;
+    } else {
+      // Get converted price from backend
+      try {
+        const response = await fetch(`/payments/api/currency/${selectedCurrency}?amount=${basePrice}`);
+        const data = await response.json();
+        if (data.success) {
+          priceElement.textContent = data.conversion.formatted;
+        } else {
+          priceElement.textContent = `${basePrice} ${selectedCurrency}`;
+        }
+      } catch (error) {
+        console.error('Error converting currency:', error);
+        priceElement.textContent = `${basePrice} ${selectedCurrency}`;
+      }
+    }
+  });
+  
+  // Update button text
+  document.querySelectorAll('.button-text').forEach(async (buttonText) => {
+    const button = buttonText.closest('.subscribe-btn');
+    const basePrice = parseFloat(button.getAttribute('data-plan-price')) || 0;
+    
+    if (basePrice > 0) {
+      if (selectedCurrency === 'USD') {
+        buttonText.textContent = `Get Lifetime Access - $${basePrice.toFixed(2)}`;
+      } else {
+        try {
+          const response = await fetch(`/payments/api/currency/${selectedCurrency}?amount=${basePrice}`);
+          const data = await response.json();
+          if (data.success) {
+            buttonText.textContent = `Get Lifetime Access - ${data.conversion.formatted}`;
+          } else {
+            buttonText.textContent = `Get Lifetime Access - ${basePrice} ${selectedCurrency}`;
+          }
+        } catch (error) {
+          console.error('Error converting currency for button:', error);
+          buttonText.textContent = `Get Lifetime Access - ${basePrice} ${selectedCurrency}`;
+        }
+      }
+    }
+  });
+}
+
+function formatCurrency(amount, currency) {
+  if (!currencyData[currency]) return `${amount} ${currency}`;
+  
+  const info = currencyData[currency];
+  let formatOptions = {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  };
+  
+  // Some currencies don't typically show decimals
+  if (['UGX', 'RWF'].includes(currency)) {
+    formatOptions.minimumFractionDigits = 0;
+    formatOptions.maximumFractionDigits = 0;
+    amount = Math.round(amount);
+  }
+  
+  const formattedAmount = amount.toLocaleString('en-US', formatOptions);
+  return `${info.symbol}${formattedAmount}`;
+}
+
+// Check if everything is loaded
+window.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded');
+  
+  // Debug currency data and dropdown
+  console.log('💰 CURRENCY FRONTEND DEBUG:');
+  console.log('currencyData loaded:', currencyData);
+  console.log('currencyData keys:', Object.keys(currencyData));
+  
+  const currencySelect = document.getElementById('currencySelect');
+  if (currencySelect) {
+    console.log('🔎 Currency select found with options:');
+    Array.from(currencySelect.options).forEach((option, index) => {
+      console.log(`  ${index}: ${option.value} (${option.text}) - selected: ${option.selected}`);
+    });
+    console.log('Default selected currency:', currencySelect.value);
+    
+    // Test currency change
+    currencySelect.addEventListener('change', function() {
+      console.log('💱 Currency changed to:', this.value);
+      updatePricing();
+    });
+    
+    // Manual test - set to RWF to see if it works
+    setTimeout(() => {
+      console.log('🧪 Testing: Setting currency to RWF manually');
+      currencySelect.value = 'RWF';
+      console.log('After setting to RWF, current value:', currencySelect.value);
+    }, 2000);
+  } else {
+    console.error('❌ Currency select element not found!');
+  }
+  
+  // Add subscribe button handlers
+  const subscribeButtons = document.querySelectorAll('.subscribe-btn');
+  subscribeButtons.forEach(button => {
+    button.addEventListener('click', function(event) {
+      // Prevent any default form submission
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const planId = this.getAttribute('data-plan-id');
+      const planName = this.getAttribute('data-plan-name');
+      const planPrice = this.getAttribute('data-plan-price');
+      
+      console.log('Subscribe button clicked:', { planId, planName, planPrice });
+      subscribeToPlan(planId, planName, planPrice);
+    });
+  });
+});
+
+function subscribeToPlan(planId, planName, planPrice) {
+  console.log('subscribeToPlan called with:', { planId, planName, planPrice });
+  
+  selectedPlan = { id: planId, name: planName, price: parseFloat(planPrice) };
+  
+  console.log('selectedPlan set to:', selectedPlan);
+  
+  // IMMEDIATE CURRENCY CHECK - before any delay
+  const currencySelectElement = document.getElementById('currencySelect');
+  console.log('🚨 IMMEDIATE CURRENCY CHECK:');
+  console.log('Currency select element found?', !!currencySelectElement);
+  if (currencySelectElement) {
+    console.log('Current selected value:', currencySelectElement.value);
+    console.log('Current selected index:', currencySelectElement.selectedIndex);
+    console.log('Selected option text:', currencySelectElement.options[currencySelectElement.selectedIndex]?.text);
+  }
+  
+  // Add small delay to prevent double-clicking issues
+  setTimeout(() => {
+    // Get the selected currency from the dropdown
+    const selectedCurrency = currencySelectElement ? currencySelectElement.value : 'USD';
+    
+    console.log('🔍 CURRENCY SELECTION DEBUG:');
+    console.log('Currency select element:', currencySelectElement);
+    console.log('Currency select element exists?', !!currencySelectElement);
+    console.log('Selected currency value:', selectedCurrency);
+    console.log('All options in select:');
+    if (currencySelectElement) {
+      Array.from(currencySelectElement.options).forEach((option, index) => {
+        console.log(`  ${index}: ${option.value} (${option.text}) - selected: ${option.selected}`);
+      });
+    }
+    
+    console.log('Using selected currency:', selectedCurrency);
+    
+    // Initiate payment with the selected currency
+    initiatePayment(selectedCurrency);
+  }, 100);
+}
+
+function initiatePayment(currency) {
+  console.log('=== FRONTEND PAYMENT DEBUG START ===');
+  console.log('initiatePayment called with currency parameter:', currency);
+  console.log('typeof currency:', typeof currency);
+  console.log('Initiating payment for:', selectedPlan, 'in currency:', currency);
+  
+  // Double-check the currency selection
+  const currencySelectElement = document.getElementById('currencySelect');
+  const currentSelectedCurrency = currencySelectElement ? currencySelectElement.value : 'USD';
+  console.log('Double-check - current currency in dropdown:', currentSelectedCurrency);
+  
+  // Use the current dropdown value as the source of truth
+  const finalCurrency = currentSelectedCurrency || currency || 'USD';
+  console.log('Final currency to use:', finalCurrency);
+  
+  if (!selectedPlan) {
+    alert('Please select a plan first');
+    return;
+  }
+  
+  // Create JSON data instead of FormData
+  const paymentData = {
+    planId: selectedPlan.id,
+    duration: 'lifetime', // Since it's a lifetime plan
+    currency: finalCurrency,
+    amount: selectedPlan.price
+  };
+  
+  console.log('Payment data being sent:', paymentData);
+  console.log('=== FRONTEND PAYMENT DEBUG END ===');
+  
+  // Submit to payment route with JSON
+  fetch('/payments/subscribe?v=' + Date.now(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(paymentData)
+  })
+  .then(response => {
+    console.log('Payment response status:', response.status);
+    return response.json();
+  })
+  .then(data => {
+    console.log('Payment response data:', data);
+    if (data.success) {
+      // Redirect to Flutterwave
+      window.location.href = data.paymentUrl;
+    } else {
+      alert('Payment initialization failed: ' + data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Payment error:', error);
+    alert('An error occurred. Please try again.');
+  });
+}
+
+function updatePriceDisplay() {
+  console.log('updatePriceDisplay called');
+  
+  if (!selectedPlan) {
+    console.log('No selectedPlan, returning');
+    return;
+  }
+  
+  console.log('selectedPlan:', selectedPlan);
+  
+  const durationElement = document.getElementById('duration');
+  const currencyElement = document.getElementById('currency');
+  
+  if (!durationElement || !currencyElement) {
+    console.error('Duration or currency element not found');
+    return;
+  }
+  
+  const duration = parseInt(durationElement.value);
+  const currency = currencyElement.value;
+  
+  console.log('Duration:', duration, 'Currency:', currency);
+  
+  // Update duration display
+  const durationText = duration === 1 ? '1 month' : `${duration} months`;
+  document.getElementById('selectedDuration').textContent = durationText;
+  
+  // Calculate total in USD first
+  const monthlyUSD = selectedPlan.price;
+  const totalUSD = monthlyUSD * duration;
+  
+  if (currency === 'USD') {
+    document.getElementById('monthlyPrice').textContent = `$${monthlyUSD.toFixed(2)}`;
+    document.getElementById('totalPrice').textContent = `$${totalUSD.toFixed(2)}`;
+    document.getElementById('exchangeInfo').style.display = 'none';
+  } else {
+    // Convert to RWF
+    fetch(`/payments/api/convert?amount=${monthlyUSD}&from=USD&to=RWF`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const monthlyRWF = data.convertedAmount;
+          const totalRWF = monthlyRWF * duration;
+          currentExchangeRate = data.exchangeRate;
+          
+          document.getElementById('monthlyPrice').textContent = `${monthlyRWF.toLocaleString()} RWF`;
+          document.getElementById('totalPrice').textContent = `${totalRWF.toLocaleString()} RWF`;
+          document.getElementById('exchangeRate').textContent = `1 USD = ${data.exchangeRate} RWF`;
+          document.getElementById('exchangeInfo').style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Currency conversion failed:', error);
+        // Fallback to USD
+        document.getElementById('currency').value = 'USD';
+        updatePriceDisplay();
+      });
+  }
+}
+
+// Event listeners
+document.getElementById('duration').addEventListener('change', updatePriceDisplay);
+document.getElementById('currency').addEventListener('change', updatePriceDisplay);
+
+document.getElementById('confirmPayment').addEventListener('click', function() {
+  if (!selectedPlan) return;
+  
+  const duration = document.getElementById('duration').value;
+  const currency = document.getElementById('currency').value;
+  
+  // Show loading state
+  this.disabled = true;
+  this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+  
+  // Create JSON data instead of FormData
+  const paymentData = {
+    planId: selectedPlan.id,
+    duration: duration,
+    currency: currentCurrency,
+    amount: selectedPlan.price
+  };
+  
+  // Submit to payment route with JSON
+  fetch('/payments/subscribe', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(paymentData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Redirect to Flutterwave
+      window.location.href = data.paymentUrl;
+    } else {
+      alert('Payment initialization failed: ' + data.message);
+      // Reset button
+      this.disabled = false;
+      this.innerHTML = 'Proceed to Payment';
+    }
+  })
+  .catch(error => {
+    console.error('Payment error:', error);
+    alert('An error occurred. Please try again.');
+    // Reset button
+    this.disabled = false;
+    this.innerHTML = 'Proceed to Payment';
+  });
+});
+
+// Handle free plan switch
+function switchToFreePlan() {
+  if (confirm('Are you sure you want to switch to the free plan? You will lose access to premium features.')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/payments/switch-to-free';
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+// Enable push notifications
+function enableNotifications() {
+  if ('Notification' in window && 'serviceWorker' in navigator) {
+    // Check if notification manager exists
+    if (window.notificationManager && typeof window.notificationManager.requestNotificationPermission === 'function') {
+      window.notificationManager.requestNotificationPermission();
+    } else {
+      // Fallback: basic notification permission
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          alert('Notifications enabled! You will receive push notifications.');
+        } else {
+          alert('Notifications were not enabled. You can enable them later in your browser settings.');
+        }
+      });
+    }
+  } else {
+    alert('Push notifications are not supported in this browser.');
+  }
+}
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,127 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+    <div class="container-fluid px-3">
+        <!-- Brand Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+            <img src="/images/logo.png" alt="Logo" class="navbar-logo me-2">
+            <span class="brand-text"><%= appName %></span>
+        </a>
+
+        <!-- Mobile toggle button -->
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navigation items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Desktop Navigation Links -->
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="bi bi-house-door me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/activities">
+                        <i class="bi bi-list-task me-1"></i>Activities
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/activities/create">
+                        <i class="bi bi-plus-circle me-1"></i>Create
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard/analytics">
+                        <i class="bi bi-graph-up me-1"></i>Analytics
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right side actions -->
+            <div class="navbar-actions d-flex align-items-center gap-3">
+                <!-- Search -->
+                <div class="search-container d-none d-md-block">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" placeholder="Search..." id="navbarSearch">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm position-relative" type="button" 
+                            id="notificationDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" 
+                              id="notificationBadge">0</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                        <li><h6 class="dropdown-header">Notifications</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <div id="notificationList">
+                            <li><span class="dropdown-item-text text-muted">No new notifications</span></li>
+                        </div>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-center small" href="/activities?completed=false">
+                                View All Activities
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- User Menu -->
+                <% if (user) { %>
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary btn-sm d-flex align-items-center" type="button" 
+                            id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span class="d-none d-md-inline"><%= user.first_name || user.name || 'User' %></span>
+                        <i class="bi bi-chevron-down ms-1"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                        <li>
+                            <h6 class="dropdown-header">
+                                <%= user.first_name %> <%= user.last_name %>
+                                <% if (userPlan) { %>
+                                    <br><small class="text-muted"><%= userPlan.plan_name || userPlan.name %></small>
+                                <% } %>
+                            </h6>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/dashboard/profile">
+                                <i class="bi bi-person me-2"></i>Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/payments/plans">
+                                <i class="bi bi-gem me-2"></i>Upgrade Plan
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/payments/history">
+                                <i class="bi bi-clock-history me-2"></i>Billing History
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="/auth/logout" method="POST" class="d-inline">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                <% } else { %>
+                <a href="/auth/login" class="btn btn-primary btn-sm">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</nav>

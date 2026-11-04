@@ -1,0 +1,296 @@
+<%- include('../partials/admin-header', { title: 'Admin Dashboard' }) %>
+
+<div class="admin-container">
+    <%- include('../partials/admin-sidebar', { page: 'dashboard' }) %>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">Admin Dashboard</h1>
+                    <p class="text-muted mb-0">System overview and statistics</p>
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-outline-primary" onclick="refreshStats()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="card-title text-muted mb-1">Total Users</h6>
+                                <h3 class="mb-0"><%= userStats.total_users %></h3>
+                                <small class="text-success">
+                                    <i class="bi bi-arrow-up"></i>
+                                    <%= userStats.admin_users %> admins
+                                </small>
+                            </div>
+                            <div class="stat-icon bg-primary">
+                                <i class="bi bi-people text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="card-title text-muted mb-1">Activities</h6>
+                                <h3 class="mb-0"><%= activityStats.total_activities %></h3>
+                                <small class="text-info">
+                                    <i class="bi bi-check-circle"></i>
+                                    <%= activityStats.completed_activities %> completed
+                                </small>
+                            </div>
+                            <div class="stat-icon bg-success">
+                                <i class="bi bi-list-task text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="card-title text-muted mb-1">Subscriptions</h6>
+                                <h3 class="mb-0"><%= subscriptionStats.total_subscriptions %></h3>
+                                <small class="text-success">
+                                    <i class="bi bi-currency-dollar"></i>
+                                    $<%= (subscriptionStats.total_revenue || 0).toFixed(2) %>
+                                </small>
+                            </div>
+                            <div class="stat-icon bg-warning">
+                                <i class="bi bi-credit-card text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h6 class="card-title text-muted mb-1">Active Subs</h6>
+                                <h3 class="mb-0"><%= subscriptionStats.active_subscriptions %></h3>
+                                <small class="text-primary">
+                                    <i class="bi bi-graph-up"></i>
+                                    Active now
+                                </small>
+                            </div>
+                            <div class="stat-icon bg-info">
+                                <i class="bi bi-graph-up text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Distribution -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Plan Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="plan-stats">
+                            <div class="plan-stat">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-medium">Free Plan</span>
+                                    <span class="badge bg-secondary"><%= userStats.free_users %></span>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar bg-secondary" 
+                                         style="width: <%= (userStats.free_users / userStats.total_users * 100).toFixed(1) %>%">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="plan-stat">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-medium">Premium Plan</span>
+                                    <span class="badge bg-success"><%= userStats.premium_users %></span>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar bg-success" 
+                                         style="width: <%= (userStats.premium_users / userStats.total_users * 100).toFixed(1) %>%">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="plan-stat">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-medium">Premium Plan</span>
+                                    <span class="badge bg-success"><%= userStats.premium_users %></span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" 
+                                         style="width: <%= (userStats.premium_users / userStats.total_users * 100).toFixed(1) %>%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/admin/users" class="btn btn-outline-primary">
+                                <i class="bi bi-people me-2"></i>Manage Users
+                            </a>
+                            <a href="/admin/plans" class="btn btn-outline-success">
+                                <i class="bi bi-gem me-2"></i>Manage Plans
+                            </a>
+                            <a href="/admin/activities" class="btn btn-outline-info">
+                                <i class="bi bi-list-task me-2"></i>View Activities
+                            </a>
+                            <a href="/admin/settings" class="btn btn-outline-warning">
+                                <i class="bi bi-gear me-2"></i>App Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Users and Premium Users -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Recent Users</h5>
+                            <a href="/admin/users" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <% if (recentUsers && recentUsers.length > 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Plan</th>
+                                            <th>Joined</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% recentUsers.forEach(user => { %>
+                                            <tr>
+                                                <td>
+                                                    <div>
+                                                        <div class="fw-medium"><%= user.first_name %> <%= user.last_name %></div>
+                                                        <small class="text-muted"><%= user.email %></small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-<%= user.plan_name === 'Premium' || user.plan_name === 'Unlimited Premium' ? 'success' : 'secondary' %>">
+                                                        <%= user.plan_name %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small><%= new Date(user.created_at).toLocaleDateString() %></small>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-people display-6"></i>
+                                <p class="mt-2 mb-0">No recent users</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Recent Premium Users</h5>
+                            <span class="badge bg-success"><%= recentUsers.filter(u => u.plan_name === 'Unlimited Premium').length %></span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <% const premiumUsers = recentUsers.filter(u => u.plan_name === 'Unlimited Premium'); %>
+                        <% if (premiumUsers && premiumUsers.length > 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Joined</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% premiumUsers.slice(0, 5).forEach(user => { %>
+                                            <tr>
+                                                <td>
+                                                    <div>
+                                                        <div class="fw-medium"><%= user.first_name %> <%= user.last_name %></div>
+                                                        <small class="text-muted"><%= user.email %></small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="text-success">
+                                                        <i class="bi bi-calendar me-1"></i>
+                                                        <%= new Date(user.created_at).toLocaleDateString() %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="/admin/users/<%= user.id %>" class="btn btn-sm btn-outline-primary">
+                                                        View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-gem display-6"></i>
+                                <p class="mt-2 mb-0">No premium users yet</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function refreshStats() {
+    window.location.reload();
+}
+</script>
+
+<%- include('../partials/admin-footer') %>

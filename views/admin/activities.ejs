@@ -1,0 +1,293 @@
+<%- include('../partials/admin-header', { title: 'Activities Management' }) %>
+
+<div class="admin-container">
+    <%- include('../partials/admin-sidebar', { page: 'activities' }) %>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">Activities Management</h1>
+                    <p class="text-muted mb-0">Monitor and manage user activities</p>
+                </div>
+                <div class="admin-actions">
+                    <div class="btn-group me-2">
+                        <button class="btn btn-outline-secondary" onclick="filterActivities('all')">All</button>
+                        <button class="btn btn-outline-secondary" onclick="filterActivities('general')">General</button>
+                        <button class="btn btn-outline-secondary" onclick="filterActivities('payment')">Payment</button>
+                        <button class="btn btn-outline-secondary" onclick="filterActivities('purchase')">Purchase</button>
+                        <button class="btn btn-outline-secondary" onclick="filterActivities('recurring')">Recurring</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="exportActivities()">
+                        <i class="bi bi-download me-1"></i>Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activities Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-list-task fs-2 mb-2"></i>
+                        <h3 class="mb-0"><%= activities.length %></h3>
+                        <small>Total Activities</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle fs-2 mb-2"></i>
+                        <h3 class="mb-0"><%= activities.filter(a => a.is_completed).length %></h3>
+                        <small>Completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clock fs-2 mb-2"></i>
+                        <h3 class="mb-0"><%= activities.filter(a => !a.is_completed).length %></h3>
+                        <small>Pending</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-arrow-repeat fs-2 mb-2"></i>
+                        <h3 class="mb-0"><%= activities.filter(a => a.type === 'recurring').length %></h3>
+                        <small>Recurring</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activities Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-activity me-2"></i>All Activities
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search activities..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <% if (activities && activities.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="activitiesTable">
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th>Due Date</th>
+                                    <th>Amount</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% activities.forEach(activity => { %>
+                                    <tr data-type="<%= activity.type %>">
+                                        <td>
+                                            <div class="fw-medium"><%= activity.title %></div>
+                                            <% if (activity.description) { %>
+                                                <small class="text-muted"><%= activity.description.substring(0, 50) %>...</small>
+                                            <% } %>
+                                            <% if (activity.category) { %>
+                                                <br><span class="badge bg-light text-dark mt-1"><%= activity.category %></span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-person text-white small"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-medium"><%= activity.first_name %> <%= activity.last_name %></div>
+                                                    <small class="text-muted"><%= activity.email %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= activity.type === 'payment' ? 'success' : activity.type === 'purchase' ? 'warning' : activity.type === 'recurring' ? 'info' : 'secondary' %>">
+                                                <%= activity.type.charAt(0).toUpperCase() + activity.type.slice(1) %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= activity.is_completed ? 'success' : 'warning' %>">
+                                                <%= activity.is_completed ? 'Completed' : 'Pending' %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress me-2" style="width: 60px; height: 6px;">
+                                                    <div class="progress-bar" style="width: <%= (activity.progress_percentage || 0) %>%"></div>
+                                                </div>
+                                                <small><%= activity.progress_percentage || 0 %>%</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <% if (activity.due_date) { %>
+                                                <% const dueDate = new Date(activity.due_date); %>
+                                                <% const now = new Date(); %>
+                                                <% const isOverdue = dueDate < now && !activity.is_completed; %>
+                                                <span class="<%= isOverdue ? 'text-danger' : 'text-muted' %>">
+                                                    <%= dueDate.toLocaleDateString() %>
+                                                </span>
+                                                <% if (isOverdue) { %>
+                                                    <br><small class="text-danger">Overdue</small>
+                                                <% } %>
+                                            <% } else { %>
+                                                <span class="text-muted">No due date</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (activity.total_amount > 0) { %>
+                                                <div class="fw-medium">$<%= activity.total_amount %></div>
+                                                <% if (activity.paid_amount > 0) { %>
+                                                    <small class="text-success">Paid: $<%= activity.paid_amount %></small>
+                                                <% } %>
+                                                <% if (activity.remaining_amount > 0) { %>
+                                                    <br><small class="text-warning">Remaining: $<%= activity.remaining_amount %></small>
+                                                <% } %>
+                                            <% } else { %>
+                                                <span class="text-muted">-</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(activity.created_at).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="/admin/users/<%= activity.user_id %>">
+                                                        <i class="bi bi-person me-2"></i>View User
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="toggleActivityStatus('<%= activity.id %>')">
+                                                        <i class="bi bi-<%= activity.is_completed ? 'x' : 'check' %>-circle me-2"></i>
+                                                        <%= activity.is_completed ? 'Mark Pending' : 'Mark Complete' %>
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteActivity('<%= activity.id %>')">
+                                                        <i class="bi bi-trash me-2"></i>Delete
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="bi bi-list-task fs-1 text-muted"></i>
+                        <h5 class="text-muted mt-3">No Activities</h5>
+                        <p class="text-muted">No activities have been created yet.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const tableRows = document.querySelectorAll('#activitiesTable tbody tr');
+    
+    tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Filter activities by type
+function filterActivities(type) {
+    const tableRows = document.querySelectorAll('#activitiesTable tbody tr');
+    const buttons = document.querySelectorAll('.btn-group button');
+    
+    // Update button states
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    tableRows.forEach(row => {
+        const rowType = row.getAttribute('data-type');
+        row.style.display = (type === 'all' || rowType === type) ? '' : 'none';
+    });
+}
+
+// Export activities
+function exportActivities() {
+    window.location.href = '/admin/activities/export';
+}
+
+// Toggle activity status
+function toggleActivityStatus(activityId) {
+    if (confirm('Are you sure you want to change this activity status?')) {
+        fetch(`/admin/activities/${activityId}/toggle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error updating activity: ' + error.message);
+        });
+    }
+}
+
+// Delete activity
+function deleteActivity(activityId) {
+    if (confirm('Are you sure you want to delete this activity? This action cannot be undone.')) {
+        fetch(`/admin/activities/${activityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error deleting activity: ' + error.message);
+        });
+    }
+}
+</script>
+
+<%- include('../partials/admin-footer') %>

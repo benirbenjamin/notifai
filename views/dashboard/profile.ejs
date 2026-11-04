@@ -1,0 +1,158 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Profile Settings</h1>
+                <a href="/dashboard" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="/dashboard/profile" method="POST">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="first_name" class="form-label">First Name *</label>
+                                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                                   value="<%= user.first_name %>" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="last_name" class="form-label">Last Name *</label>
+                                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                                   value="<%= user.last_name %>" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="<%= user.email %>" readonly>
+                                    <div class="form-text">Email cannot be changed after registration.</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="phone" class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                                   value="<%= user.phone || '' %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="country_code" class="form-label">Country Code</label>
+                                            <input type="text" class="form-control" id="country_code" name="country_code" 
+                                                   value="<%= user.country_code || '' %>" placeholder="+1">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="company" class="form-label">Company</label>
+                                            <input type="text" class="form-control" id="company" name="company" 
+                                                   value="<%= user.company || '' %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_title" class="form-label">Job Title</label>
+                                            <input type="text" class="form-control" id="job_title" name="job_title" 
+                                                   value="<%= user.job_title || '' %>">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="timezone" class="form-label">Timezone</label>
+                                    <select class="form-select" id="timezone" name="timezone">
+                                        <option value="UTC" <%= user.timezone === 'UTC' ? 'selected' : '' %>>UTC</option>
+                                        <option value="America/New_York" <%= user.timezone === 'America/New_York' ? 'selected' : '' %>>Eastern Time</option>
+                                        <option value="America/Chicago" <%= user.timezone === 'America/Chicago' ? 'selected' : '' %>>Central Time</option>
+                                        <option value="America/Denver" <%= user.timezone === 'America/Denver' ? 'selected' : '' %>>Mountain Time</option>
+                                        <option value="America/Los_Angeles" <%= user.timezone === 'America/Los_Angeles' ? 'selected' : '' %>>Pacific Time</option>
+                                        <option value="Europe/London" <%= user.timezone === 'Europe/London' ? 'selected' : '' %>>London Time</option>
+                                        <option value="Europe/Paris" <%= user.timezone === 'Europe/Paris' ? 'selected' : '' %>>Central European Time</option>
+                                        <option value="Asia/Tokyo" <%= user.timezone === 'Asia/Tokyo' ? 'selected' : '' %>>Japan Time</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Notification Preferences</h6>
+                        </div>
+                        <div class="card-body">
+                            <form action="/dashboard/notifications" method="POST">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="email_notifications" 
+                                               name="email_notifications" <%= user.email_notifications ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="email_notifications">
+                                            Email Notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="sms_notifications" 
+                                               name="sms_notifications" <%= user.sms_notifications ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="sms_notifications">
+                                            SMS Notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Update Preferences</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Account Info</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted">Member since:</small><br>
+                                <%= new Date(user.created_at).toLocaleDateString() %>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Current Plan:</small><br>
+                                <span class="badge bg-primary"><%= userPlan?.name || 'Free' %></span>
+                            </div>
+                            <% if (user.google_id) { %>
+                            <div class="mb-2">
+                                <small class="text-muted">Connected to Google</small><br>
+                                <i class="fab fa-google text-danger"></i> Google Account
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

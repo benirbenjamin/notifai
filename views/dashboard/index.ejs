@@ -1,0 +1,746 @@
+<%- include('../partials/header') %>
+
+<style>
+/* Clickable card styles */
+.clickable-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.clickable-card:active {
+    transform: translateY(0);
+}
+
+/* Prevent button clicks from triggering card click */
+.clickable-card .btn,
+.clickable-card button,
+.clickable-card .dropdown,
+.clickable-card .action-button {
+    position: relative;
+    z-index: 10;
+}
+</style>
+
+<div class="container-fluid">
+  <!-- Welcome Message for New Users -->
+  <% if (welcome) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <h5 class="alert-heading"><i class="bi bi-party-popper me-2"></i>Welcome to Managinga Space!</h5>
+      <p class="mb-2">Your account has been created successfully! You can create up to 10 activities with full website access.</p>
+      <p class="mb-0">Start by <a href="/activities/create" class="alert-link">creating your first activity</a> or <a href="/payments/plans" class="alert-link">upgrade to lifetime premium</a> for unlimited activities.</p>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% } %>
+  
+  <!-- Plan Status Alert -->
+  <% if (userPlan) { %>
+    <% if (userPlan.plan_name === 'Free' || userPlan.name === 'Free') { %>
+      <% 
+        const activityCount = stats ? stats.total_activities : 0;
+        const remaining = 10 - activityCount;
+        const percentage = Math.round((activityCount / 10) * 100);
+      %>
+      <div class="alert alert-<%= remaining <= 2 ? 'warning' : 'info' %> alert-dismissible fade show" role="alert">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-activity me-2"></i>
+            <strong>Free Plan:</strong> <%= activityCount %>/10 activities used
+            <% if (remaining <= 2) { %>
+              (<%= remaining %> remaining)
+            <% } %>
+          </div>
+          <div class="progress" style="width: 120px; height: 8px;">
+            <div class="progress-bar <%= percentage >= 80 ? 'bg-warning' : 'bg-primary' %>" 
+                 style="width: <%- percentage %>%"></div>
+          </div>
+        </div>
+        <div class="mt-2">
+          <% if (remaining <= 0) { %>
+            <strong>Activity limit reached!</strong> 
+            <a href="/payments/plans" class="alert-link">Upgrade to Lifetime Premium ($10)</a> for unlimited activities.
+          <% } else if (remaining <= 2) { %>
+            You're almost at your limit! 
+            <a href="/payments/plans" class="alert-link">Upgrade to Lifetime Premium ($10)</a> for unlimited activities.
+          <% } else { %>
+            Enjoying the app? 
+            <a href="/payments/plans" class="alert-link">Get lifetime access for just $10</a> - no recurring fees!
+          <% } %>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } else if (userPlan.is_lifetime) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-gem me-2"></i>
+        <strong>Lifetime Premium Active</strong> - You have unlimited access to all features forever! 
+        Thank you for supporting Managinga Space.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>
+  <% } %>
+
+  <!-- Dashboard Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h2 mb-1">Dashboard</h1>
+          <p class="text-muted mb-0">Welcome back, <%= user.firstName %>! Here's what's happening with your activities.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/activities/create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>New Activity
+          </a>
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-funnel me-2"></i>Quick Actions
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/activities?completed=false">
+                <i class="bi bi-list-task me-2"></i>View Pending Activities
+              </a></li>
+              <li><a class="dropdown-item" href="/activities?type=payment">
+                <i class="bi bi-credit-card me-2"></i>Payment Activities
+              </a></li>
+              <li><a class="dropdown-item" href="/dashboard/analytics">
+                <i class="bi bi-graph-up me-2"></i>View Analytics
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" onclick="testPushNotification()">
+                <i class="bi bi-bell me-2"></i>Test Push Notification
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/dashboard/profile">
+                <i class="bi bi-person me-2"></i>Profile Settings
+              </a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card dashboard-stats success h-100">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="h3 mb-1"><%= stats.total_activities || 0 %></div>
+              <div class="text-muted text-uppercase small">Total Activities</div>
+            </div>
+            <div class="col-auto">
+              <i class="bi bi-list-task h2 text-success"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card dashboard-stats info h-100">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="h3 mb-1"><%= stats.completed_activities || 0 %></div>
+              <div class="text-muted text-uppercase small">Completed</div>
+            </div>
+            <div class="col-auto">
+              <i class="bi bi-check-circle h2 text-info"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card dashboard-stats warning h-100">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="h3 mb-1"><%= stats.pending_activities || 0 %></div>
+              <div class="text-muted text-uppercase small">Pending</div>
+            </div>
+            <div class="col-auto">
+              <i class="bi bi-clock h2 text-warning"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card dashboard-stats <%= (stats.overdue_activities || 0) > 0 ? 'danger' : 'success' %> h-100">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col">
+              <div class="h3 mb-1"><%= stats.overdue_activities || 0 %></div>
+              <div class="text-muted text-uppercase small">Overdue</div>
+            </div>
+            <div class="col-auto">
+              <i class="bi bi-exclamation-triangle h2 text-<%= (stats.overdue_activities || 0) > 0 ? 'danger' : 'success' %>"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-graph-up me-2"></i>Progress Overview
+          </h5>
+          <span class="badge bg-primary"><%= completionRate %>% Complete</span>
+        </div>
+        <div class="card-body">
+          <div class="progress mb-3" style="height: 15px;">
+            <div class="progress-bar" 
+                 role="progressbar" 
+                 style="width: <%= completionRate %>%">
+              <%= completionRate %>%
+            </div>
+          </div>
+          
+          <!-- Payment Overview (if any payment activities) -->
+          <% if (stats.total_payment_amount > 0) { %>
+            <div class="row text-center">
+              <div class="col-md-4">
+                <div class="h4 text-primary">$<%= parseFloat(stats.total_payment_amount || 0).toFixed(2) %></div>
+                <div class="text-muted small">Total Amount</div>
+              </div>
+              <div class="col-md-4">
+                <div class="h4 text-success">$<%= parseFloat(stats.total_paid_amount || 0).toFixed(2) %></div>
+                <div class="text-muted small">Paid</div>
+              </div>
+              <div class="col-md-4">
+                <div class="h4 text-warning">$<%= parseFloat(stats.total_remaining_amount || 0).toFixed(2) %></div>
+                <div class="text-muted small">Remaining</div>
+              </div>
+            </div>
+          <% } else { %>
+            <div class="text-center text-muted py-3">
+              <i class="bi bi-graph-up-arrow h1 d-block mb-2"></i>
+              <p class="mb-0">Your progress will be shown here as you create and complete activities.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-speedometer2 me-2"></i>Quick Stats
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <span>Average Progress</span>
+              <span class="badge bg-primary rounded-pill"><%= Math.round(stats.average_progress || 0) %>%</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <span>Payment Activities</span>
+              <span class="badge bg-success rounded-pill"><%= paymentActivities.length %></span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <span>Due This Week</span>
+              <span class="badge bg-warning rounded-pill"><%= upcomingActivities.length %></span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <span>Overdue Items</span>
+              <span class="badge bg-danger rounded-pill"><%= overdueActivities.length %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="row">
+    <!-- Recent Activities -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i>Recent Activities
+          </h5>
+          <a href="/activities" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+          <% if (recentActivities.length > 0) { %>
+            <div class="list-group list-group-flush">
+              <% recentActivities.forEach(activity => { %>
+                <div class="list-group-item activity-card <%= activity.is_completed ? 'completed' : '' %> px-0 clickable-card" data-activity-id="<%= activity.id %>" style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1">
+                        <a href="/activities/<%= activity.id %>" class="text-decoration-none">
+                          <%= activity.title %>
+                        </a>
+                      </h6>
+                      <div class="d-flex gap-2 mb-2">
+                        <span class="badge bg-primary"><%= activity.type %></span>
+                        <span class="badge priority-badge <%= activity.priority %>"><%= activity.priority %></span>
+                        <% if (activity.category) { %>
+                          <span class="badge bg-secondary"><%= activity.category %></span>
+                        <% } %>
+                      </div>
+                      <% if (activity.due_date) { %>
+                        <small class="text-muted">
+                          <i class="bi bi-calendar me-1"></i>
+                          Due: <%= new Date(activity.due_date).toLocaleDateString() %>
+                        </small>
+                      <% } %>
+                    </div>
+                    <div class="text-end">
+                      <% if (activity.is_completed) { %>
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                      <% } else { %>
+                        <% 
+                          let timeProgressText = '0%';
+                          let progressBarWidth = activity.progress_percentage || 0;
+                          
+                          // For timed activities, use start_time and end_time
+                          if (activity.type === 'timed' && activity.start_time && activity.end_time) {
+                            const now = new Date();
+                            const endTime = new Date(activity.end_time);
+                            const timeLeft = endTime - now;
+                            
+                            if (timeLeft > 0) {
+                              const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                              const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                              const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                              
+                              let timeDisplay = '';
+                              if (days > 0) timeDisplay += `${days}d `;
+                              if (hours > 0) timeDisplay += `${hours}h `;
+                              if (minutes > 0) timeDisplay += `${minutes}m`;
+                              if (!timeDisplay) timeDisplay = '<1m';
+                              
+                              timeProgressText = timeDisplay;
+                            } else {
+                              timeProgressText = 'Expired';
+                            }
+                          }
+                          // For regular activities with due dates, calculate time-based progress
+                          else if (activity.due_date) {
+                            const now = new Date();
+                            const createdDate = new Date(activity.created_at);
+                            const dueDate = new Date(activity.due_date);
+                            const totalDuration = dueDate - createdDate;
+                            const elapsed = now - createdDate;
+                            const timeLeft = dueDate - now;
+                            
+                            if (timeLeft > 0) {
+                              progressBarWidth = Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
+                              const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                              const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                              const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                              
+                              if (days > 0) {
+                                timeProgressText = `${days}d ${hours}h ${minutes}m left`;
+                              } else if (hours > 0) {
+                                timeProgressText = `${hours}h ${minutes}m left`;
+                              } else if (minutes > 0) {
+                                timeProgressText = `${minutes}m left`;
+                              } else {
+                                timeProgressText = '<1m left';
+                              }
+                            } else {
+                              progressBarWidth = 100;
+                              timeProgressText = 'Overdue';
+                            }
+                          } else {
+                            timeProgressText = progressBarWidth + '%';
+                          }
+                        %>
+                        
+                        <% if (activity.due_date || (activity.type === 'timed' && activity.end_time)) { %>
+                          <small class="<%= timeProgressText === 'Expired' || timeProgressText === 'Overdue' ? 'text-danger' : 'text-info' %> fw-bold time-countdown" data-end-time="<%= activity.end_time || activity.due_date %>">
+                            <i class="bi bi-hourglass-split me-1"></i>
+                            <%= timeProgressText %>
+                          </small>
+                        <% } else { %>
+                          <div class="progress" style="width: 60px; height: 8px;">
+                            <div class="progress-bar" style="width: <%= progressBarWidth %>%"></div>
+                          </div>
+                          <small class="text-muted"><%= progressBarWidth %>%</small>
+                        <% } %>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="text-center text-muted py-4">
+              <i class="bi bi-inbox h1 d-block mb-2"></i>
+              <p class="mb-2">No activities yet</p>
+              <a href="/activities/create" class="btn btn-primary">Create Your First Activity</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming & Overdue -->
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" data-bs-toggle="tab" href="#upcoming" role="tab">
+                <i class="bi bi-calendar-event me-1"></i>
+                Upcoming (<%= upcomingActivities.length %>)
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#overdue" role="tab">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Overdue (<%= overdueActivities.length %>)
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content">
+            <!-- Upcoming Activities -->
+            <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+              <% if (upcomingActivities.length > 0) { %>
+                <div class="list-group list-group-flush">
+                  <% upcomingActivities.forEach(activity => { %>
+                    <div class="list-group-item activity-card px-0 clickable-card" data-activity-id="<%= activity.id %>" style="cursor: pointer;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 class="mb-1">
+                            <a href="/activities/<%= activity.id %>" class="text-decoration-none">
+                              <%= activity.title %>
+                            </a>
+                          </h6>
+                          <small class="text-success">
+                            <i class="bi bi-calendar me-1"></i>
+                            <% 
+                              let dueDateText = '';
+                              
+                              if (activity.type === 'timed' && activity.start_time && activity.end_time) {
+                                const now = new Date();
+                                const startTime = new Date(activity.start_time);
+                                const endTime = new Date(activity.end_time);
+                                
+                                if (now < startTime) {
+                                  const timeToStart = startTime - now;
+                                  const days = Math.floor(timeToStart / (1000 * 60 * 60 * 24));
+                                  const hours = Math.floor((timeToStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                  const minutes = Math.floor((timeToStart % (1000 * 60 * 60)) / (1000 * 60));
+                                  
+                                  if (days > 0) {
+                                    dueDateText = `Starts in ${days}d ${hours}h ${minutes}m`;
+                                  } else if (hours > 0) {
+                                    dueDateText = `Starts in ${hours}h ${minutes}m`;
+                                  } else if (minutes > 0) {
+                                    dueDateText = `Starts in ${minutes}m`;
+                                  } else {
+                                    dueDateText = 'Starts soon';
+                                  }
+                                } else {
+                                  const timeLeft = endTime - now;
+                                  if (timeLeft > 0) {
+                                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                    
+                                    if (days > 0) {
+                                      dueDateText = `${days}d ${hours}h ${minutes}m remaining`;
+                                    } else if (hours > 0) {
+                                      dueDateText = `${hours}h ${minutes}m remaining`;
+                                    } else if (minutes > 0) {
+                                      dueDateText = `${minutes}m remaining`;
+                                    } else {
+                                      dueDateText = '<1m remaining';
+                                    }
+                                  } else {
+                                    dueDateText = 'Time expired';
+                                  }
+                                }
+                              } else if (activity.due_date) {
+                                const now = new Date();
+                                const dueDate = new Date(activity.due_date);
+                                const timeLeft = dueDate - now;
+                                const days = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
+                                
+                                if (days > 0) {
+                                  dueDateText = `Due in ${days} day${days > 1 ? 's' : ''}`;
+                                } else {
+                                  dueDateText = 'Due today';
+                                }
+                              } else {
+                                dueDateText = 'No due date';
+                              }
+                            %>
+                            <%= dueDateText %>
+                          </small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-success" 
+                                onclick="MS.activities.toggleCompletion('<%= activity.id %>', this)">
+                          <i class="bi bi-check"></i>
+                        </button>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <div class="text-center text-muted py-3">
+                  <i class="bi bi-calendar-check h3 d-block mb-2"></i>
+                  <p class="mb-0">No upcoming activities</p>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Overdue Activities -->
+            <div class="tab-pane fade" id="overdue" role="tabpanel">
+              <% if (overdueActivities.length > 0) { %>
+                <div class="list-group list-group-flush">
+                  <% overdueActivities.forEach(activity => { %>
+                    <div class="list-group-item activity-card overdue px-0 clickable-card" data-activity-id="<%= activity.id %>" style="cursor: pointer;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 class="mb-1">
+                            <a href="/activities/<%= activity.id %>" class="text-decoration-none">
+                              <%= activity.title %>
+                            </a>
+                          </h6>
+                          <small class="text-danger">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <% if (activity.type === 'timed' && activity.end_time) { %>
+                              <% 
+                                const now = new Date();
+                                const endTime = new Date(activity.end_time);
+                                const overdue = now - endTime;
+                                const days = Math.floor(overdue / (1000 * 60 * 60 * 24));
+                                const hours = Math.floor((overdue % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const minutes = Math.floor((overdue % (1000 * 60 * 60)) / (1000 * 60));
+                                
+                                let overdueDisplay = '';
+                                if (days > 0) overdueDisplay += `${days}d `;
+                                if (hours > 0) overdueDisplay += `${hours}h `;
+                                if (minutes > 0) overdueDisplay += `${minutes}m`;
+                                if (!overdueDisplay) overdueDisplay = '<1m';
+                              %>
+                              Expired <%= overdueDisplay %> ago
+                            <% } else { %>
+                              Overdue by <%= Math.ceil((new Date() - new Date(activity.due_date)) / (1000 * 60 * 60 * 24)) %> days
+                            <% } %>
+                          </small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-success" 
+                                onclick="MS.activities.toggleCompletion('<%= activity.id %>', this)">
+                          <i class="bi bi-check"></i>
+                        </button>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <div class="text-center text-muted py-3">
+                  <i class="bi bi-emoji-smile h3 d-block mb-2"></i>
+                  <p class="mb-0">No overdue activities - Great job!</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Activities (if any) -->
+  <% if (paymentActivities.length > 0) { %>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-credit-card me-2"></i>Payment Tracking
+            </h5>
+            <a href="/activities?type=payment" class="btn btn-sm btn-outline-primary">View All Payments</a>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <% paymentActivities.forEach(activity => { %>
+                <div class="col-md-6 col-lg-4 mb-3">
+                  <div class="card border-left-primary clickable-card" data-activity-id="<%= activity.id %>" style="cursor: pointer;">
+                    <div class="card-body">
+                      <h6 class="card-title">
+                        <a href="/activities/<%= activity.id %>" class="text-decoration-none">
+                          <%= activity.title %>
+                        </a>
+                      </h6>
+                      <div class="mb-2">
+                        <div class="d-flex justify-content-between text-sm">
+                          <span>Progress</span>
+                          <span><%= Math.round((activity.paid_amount / activity.total_amount) * 100) %>%</span>
+                        </div>
+                        <div class="progress">
+                          <div class="progress-bar bg-success" 
+                               style="width: <%= Math.round((activity.paid_amount / activity.total_amount) * 100) %>%"></div>
+                        </div>
+                      </div>
+                      <div class="d-flex justify-content-between text-sm">
+                        <span class="text-muted">Paid:</span>
+                        <span class="text-success">$<%= parseFloat(activity.paid_amount || 0).toFixed(2) %></span>
+                      </div>
+                      <div class="d-flex justify-content-between text-sm">
+                        <span class="text-muted">Remaining:</span>
+                        <span class="text-warning">$<%= parseFloat(activity.remaining_amount || 0).toFixed(2) %></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<!-- Additional Dashboard Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle clickable card navigation
+  document.querySelectorAll('.clickable-card[data-activity-id]').forEach(card => {
+    card.addEventListener('click', function(event) {
+      // Only navigate if the click target is not a button or form element
+      if (!event.target.closest('.btn, button, input, select, textarea, .dropdown')) {
+        const activityId = this.getAttribute('data-activity-id');
+        if (activityId) {
+          window.location.href = `/activities/${activityId}`;
+        }
+      }
+    });
+  });
+  
+  // Prevent button clicks from triggering card clicks (backup)
+  document.querySelectorAll('.clickable-card .btn, .clickable-card button, .clickable-card .dropdown').forEach(button => {
+    button.addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+  });
+  
+  // Auto-refresh dashboard data every 5 minutes
+  setInterval(async () => {
+    try {
+      const response = await MS.api.get('/dashboard');
+      if (response.success) {
+        // Update statistics without full page refresh
+        console.log('Dashboard data refreshed');
+      }
+    } catch (error) {
+      console.log('Failed to refresh dashboard data');
+    }
+  }, 5 * 60 * 1000);
+  
+  // Initialize tooltips for progress bars
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('.progress[title]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Real-time countdown for time-based activities
+  function updateCountdowns() {
+    const countdownElements = document.querySelectorAll('.time-countdown');
+    countdownElements.forEach(element => {
+      const endTime = new Date(element.dataset.endTime);
+      const now = new Date();
+      const timeLeft = endTime - now;
+
+      if (timeLeft > 0) {
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeDisplay = '';
+        if (days > 0) timeDisplay += `${days}d `;
+        if (hours > 0) timeDisplay += `${hours}h `;
+        if (minutes > 0) timeDisplay += `${minutes}m`;
+        if (!timeDisplay) timeDisplay = '<1m';
+        
+        element.textContent = timeDisplay;
+        element.className = 'time-countdown text-info fw-bold';
+      } else {
+        element.textContent = 'Expired';
+        element.className = 'time-countdown text-danger fw-bold';
+      }
+    });
+  }
+
+  // Update countdowns every minute
+  updateCountdowns();
+  setInterval(updateCountdowns, 60000);
+  
+  // Test Push Notification Function
+  window.testPushNotification = async function() {
+    try {
+      const response = await fetch('/test/test-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Show success toast
+        const toastHTML = `
+          <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>Test notification sent! Check your notifications.
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+          </div>
+        `;
+        
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+          toastContainer = document.createElement('div');
+          toastContainer.id = 'toast-container';
+          toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+          toastContainer.style.zIndex = '9999';
+          document.body.appendChild(toastContainer);
+        }
+        
+        // Add toast and show it
+        toastContainer.innerHTML = toastHTML;
+        const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+        toast.show();
+        
+      } else {
+        alert('Failed to send test notification: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error sending test notification:', error);
+      alert('Error sending test notification: ' + error.message);
+    }
+  };
+});
+</script>
+
+<script src="/js/collaboration.js"></script>
+
+<%- include('../partials/footer') %>

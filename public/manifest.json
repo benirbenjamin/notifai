@@ -1,0 +1,74 @@
+{
+  "name": "Managinga Space",
+  "short_name": "Managinga",
+  "description": "Smart Activity Manager with Advanced Features",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/images/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiI+CiAgPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiMwMDdiZmYiIHJ4PSIyNCIvPgogIDxjaXJjbGUgY3g9Ijk2IiBjeT0iNzAiIHI9IjIwIiBmaWxsPSJ3aGl0ZSIvPgogIDxyZWN0IHg9IjY2IiB5PSIxMDAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiBmaWxsPSJ3aGl0ZSIgcng9IjQiLz4KICA8cmVjdCB4PSI2NiIgeT0iMTIwIiB3aWR0aD0iNDUiIGhlaWdodD0iOCIgZmlsbD0id2hpdGUiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iNjYiIHk9IjE0MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjgiIGZpbGw9IndoaXRlIiByeD0iNCIvPgo8L3N2Zz4K",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to your dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiI+CiAgPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiMwMDdiZmYiIHJ4PSIyNCIvPgogIDxjaXJjbGUgY3g9Ijk2IiBjeT0iNzAiIHI9IjIwIiBmaWxsPSJ3aGl0ZSIvPgogIDxyZWN0IHg9IjY2IiB5PSIxMDAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiBmaWxsPSJ3aGl0ZSIgcng9IjQiLz4KICA8cmVjdCB4PSI2NiIgeT0iMTIwIiB3aWR0aD0iNDUiIGhlaWdodD0iOCIgZmlsbD0id2hpdGUiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iNjYiIHk9IjE0MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjgiIGZpbGw9IndoaXRlIiByeD0iNCIvPgo8L3N2Zz4K",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "New Activity",
+      "short_name": "New Activity",
+      "description": "Create a new activity",
+      "url": "/activities/new",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiI+CiAgPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiMwMDdiZmYiIHJ4PSIyNCIvPgogIDxjaXJjbGUgY3g9Ijk2IiBjeT0iNzAiIHI9IjIwIiBmaWxsPSJ3aGl0ZSIvPgogIDxyZWN0IHg9IjY2IiB5PSIxMDAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiBmaWxsPSJ3aGl0ZSIgcng9IjQiLz4KICA8cmVjdCB4PSI2NiIgeT0iMTIwIiB3aWR0aD0iNDUiIGhlaWdodD0iOCIgZmlsbD0id2hpdGUiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iNjYiIHk9IjE0MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjgiIGZpbGw9IndoaXRlIiByeD0iNCIvPgo8L3N2Zz4K",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NDAsMzIwIj4KICA8cmVjdCB3aWR0aD0iNTQwIiBoZWlnaHQ9IjMyMCIgZmlsbD0iI2Y4ZjlmYSIvPgogIDx0ZXh0IHg9IjI3MCIgeT0iMTYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzMzMzMzMyI+TWFuYWdpbmdhIFNwYWNlIERhc2hib2FyZDwvdGV4dD4KPC9zdmc+",
+      "sizes": "540x320",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Dashboard Screenshot"
+    }
+  ]
+}

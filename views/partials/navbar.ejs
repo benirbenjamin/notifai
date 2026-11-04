@@ -1,0 +1,297 @@
+<nav class="navbar">
+    <div class="container-fluid">
+        <!-- Brand with Logo -->
+        <a class="navbar-brand" href="/dashboard">
+            <img src="/images/logo.png" alt="<%= appName %> Logo" />
+            <span class="d-none d-sm-inline"><%= appName %></span>
+        </a>
+        
+        <!-- Desktop Navigation (Hidden on Mobile) -->
+        <ul class="navbar-nav desktop-only me-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">
+                    <i class="bi bi-house me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/activities">
+                    <i class="bi bi-list-task me-1"></i>Activities
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/activities/create">
+                    <i class="bi bi-plus-circle me-1"></i>Create
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard/analytics">
+                    <i class="bi bi-graph-up me-1"></i>Analytics
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Right Side Actions -->
+        <div class="navbar-actions">
+            <!-- Search (Hidden on small mobile) -->
+            <div class="navbar-search">
+                <input type="text" class="form-control" placeholder="Search..." id="navbarSearch">
+                <div id="searchResults" class="search-results d-none"></div>
+            </div>
+            
+            <!-- Notifications -->
+            <div class="dropdown">
+                <button class="btn btn-sm position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge">0</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
+                    <li><h6 class="dropdown-header">Notifications</h6></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <div id="notificationList">
+                        <li><span class="dropdown-item-text text-muted">No new notifications</span></li>
+                    </div>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-center" href="/activities?completed=false">
+                        <small>View All Activities</small>
+                    </a></li>
+                </ul>
+            </div>
+            
+            <!-- User Menu -->
+            <% if (user) { %>
+                <div class="dropdown">
+                    <button class="btn btn-sm" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="d-none d-md-inline ms-1"><%= user.name || user.email %></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">
+                            <% if (userPlan) { %>
+                                <%= userPlan.plan_name || userPlan.name %>
+                                <% if (userPlan.plan_name === 'Free' || userPlan.name === 'Free') { %>
+                                    <span class="badge bg-secondary ms-1">Free</span>
+                                <% } else { %>
+                                    <span class="badge bg-success ms-1">Premium</span>
+                                <% } %>
+                            <% } %>
+                        </h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/dashboard/profile">
+                            <i class="bi bi-person me-2"></i>Profile
+                        </a></li>
+                        <li><a class="dropdown-item" href="/payments/plans">
+                            <i class="bi bi-gem me-2"></i>Upgrade Plan
+                        </a></li>
+                        <li><a class="dropdown-item" href="/payments/history">
+                            <i class="bi bi-clock-history me-2"></i>Billing History
+                        </a></li>
+                        
+                        <!-- Admin Menu -->
+                        <% if (user.is_admin) { %>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Admin</h6></li>
+                            <li><a class="dropdown-item" href="/admin/dashboard">
+                                <i class="bi bi-gear me-2"></i>Admin Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/users">
+                                <i class="bi bi-people me-2"></i>Users
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/plans">
+                                <i class="bi bi-gem me-2"></i>Plans
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/settings">
+                                <i class="bi bi-sliders me-2"></i>Settings
+                            </a></li>
+                        <% } %>
+                        
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="/auth/logout" method="POST" style="display: inline;">
+                                <button type="submit" class="dropdown-item">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            <% } else { %>
+                <!-- Login button for non-authenticated users -->
+                <a href="/auth/login" class="btn btn-outline-primary">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                </a>
+            <% } %>
+        </div>
+    </div>
+</nav>
+
+<!-- Quick Add Activity Button (Floating) -->
+<div class="floating-action-btn">
+    <button class="btn btn-primary btn-lg rounded-circle" data-bs-toggle="modal" data-bs-target="#quickAddModal" title="Quick Add Activity">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+</div>
+
+<!-- Quick Add Modal -->
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Add Activity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickAddForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="quickTitle" class="form-label">Title *</label>
+                        <input type="text" class="form-control" id="quickTitle" name="title" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="quickType" class="form-label">Type</label>
+                                <select class="form-select" id="quickType" name="type">
+                                    <option value="general">General</option>
+                                    <option value="payment">Payment</option>
+                                    <option value="purchase">Purchase</option>
+                                    <option value="recurring">Recurring</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="quickDueDate" class="form-label">Due Date</label>
+                                <input type="datetime-local" class="form-control" id="quickDueDate" name="dueDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="quickAddError" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none me-2" id="quickAddSpinner"></span>
+                        Add Activity
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Logout function
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        fetch('/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(() => {
+            window.location.href = '/';
+        });
+    }
+}
+
+// Quick Add Form Handler
+document.getElementById('quickAddForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    const spinner = document.getElementById('quickAddSpinner');
+    const errorDiv = document.getElementById('quickAddError');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    // Show loading state
+    spinner.classList.remove('d-none');
+    submitBtn.disabled = true;
+    errorDiv.classList.add('d-none');
+    
+    try {
+        const response = await fetch('/api/activities/quick', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Close modal and refresh page or update UI
+            bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+            form.reset();
+            
+            // Show success message
+            showToast('Activity created successfully!', 'success');
+            
+            // Optionally refresh activities list if on activities page
+            if (window.location.pathname.includes('/activities')) {
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        } else {
+            errorDiv.textContent = result.message;
+            errorDiv.classList.remove('d-none');
+        }
+    } catch (error) {
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.classList.remove('d-none');
+    } finally {
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+    }
+});
+
+// Search functionality
+let searchTimeout;
+document.getElementById('navbarSearch').addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        document.getElementById('searchResults').classList.add('d-none');
+        return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=5`);
+            const result = await response.json();
+            
+            if (result.success) {
+                displaySearchResults(result.data);
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    }, 300);
+});
+
+function displaySearchResults(activities) {
+    const resultsDiv = document.getElementById('searchResults');
+    
+    if (activities.length === 0) {
+        resultsDiv.innerHTML = '<div class="search-item">No activities found</div>';
+    } else {
+        resultsDiv.innerHTML = activities.map(activity => `
+            <a href="/activities/${activity.id}" class="search-item">
+                <div class="fw-bold">${activity.title}</div>
+                <small class="text-muted">${activity.type} • ${activity.priority} priority</small>
+            </a>
+        `).join('');
+    }
+    
+    resultsDiv.classList.remove('d-none');
+}
+
+// Hide search results when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.navbar-search')) {
+        document.getElementById('searchResults').classList.add('d-none');
+    }
+});
+</script>

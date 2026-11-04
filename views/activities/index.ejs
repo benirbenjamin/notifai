@@ -1,0 +1,949 @@
+<style>
+/* Enhanced styles for timed activities */
+.activity-card[data-end-time] .time-remaining {
+    animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.activity-card.border-danger {
+    border-width: 2px !important;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+.overdue-task {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.5; }
+}
+
+/* Progress bar animations for time-based activities */
+.progress-bar.bg-warning {
+    animation: progress-pulse 2s infinite;
+}
+
+@keyframes progress-pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* Clickable card styles */
+.clickable-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.clickable-card:active {
+    transform: translateY(0);
+}
+
+/* Prevent button clicks from triggering card click */
+.clickable-card .btn,
+.clickable-card button,
+.clickable-card .dropdown,
+.clickable-card .action-button {
+    position: relative;
+    z-index: 10;
+}
+</style>
+
+<%- include('../partials/header') %>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">My Activities</h1>
+            <p class="text-muted mb-0">Manage and track your activities</p>
+        </div>
+        <div>
+            <a href="/activities/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Create Activity
+            </a>
+        </div>
+    </div>
+
+    <!-- Activity Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Activities</h6>
+                            <h3 class="mb-0"><%= stats.total || 0 %></h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-list-task fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Completed</h6>
+                            <h3 class="mb-0"><%= stats.completed || 0 %></h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-check-circle fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">In Progress</h6>
+                            <h3 class="mb-0"><%= stats.inProgress || 0 %></h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-clock fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Overdue</h6>
+                            <h3 class="mb-0"><%= stats.overdue || 0 %></h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-exclamation-triangle fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="/activities" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="Search activities...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+                        <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                        <option value="overdue" <%= filters.status === 'overdue' ? 'selected' : '' %>>Overdue</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" name="type">
+                        <option value="">All Types</option>
+                        <option value="general" <%= filters.type === 'general' ? 'selected' : '' %>>General</option>
+                        <option value="payment" <%= filters.type === 'payment' ? 'selected' : '' %>>Payment</option>
+                        <option value="purchase" <%= filters.type === 'purchase' ? 'selected' : '' %>>Purchase</option>
+                        <option value="recurring" <%= filters.type === 'recurring' ? 'selected' : '' %>>Recurring</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        <optgroup label="Work & Business">
+                            <option value="Work" <%= filters.category === 'Work' ? 'selected' : '' %>>Work</option>
+                            <option value="Business" <%= filters.category === 'Business' ? 'selected' : '' %>>Business</option>
+                            <option value="Meetings" <%= filters.category === 'Meetings' ? 'selected' : '' %>>Meetings</option>
+                            <option value="Projects" <%= filters.category === 'Projects' ? 'selected' : '' %>>Projects</option>
+                            <option value="Career" <%= filters.category === 'Career' ? 'selected' : '' %>>Career</option>
+                        </optgroup>
+                        <optgroup label="Personal Life">
+                            <option value="Personal" <%= filters.category === 'Personal' ? 'selected' : '' %>>Personal</option>
+                            <option value="Family" <%= filters.category === 'Family' ? 'selected' : '' %>>Family</option>
+                            <option value="Friends" <%= filters.category === 'Friends' ? 'selected' : '' %>>Friends</option>
+                            <option value="Social" <%= filters.category === 'Social' ? 'selected' : '' %>>Social</option>
+                            <option value="Relationships" <%= filters.category === 'Relationships' ? 'selected' : '' %>>Relationships</option>
+                        </optgroup>
+                        <optgroup label="Health & Wellness">
+                            <option value="Health" <%= filters.category === 'Health' ? 'selected' : '' %>>Health</option>
+                            <option value="Exercise" <%= filters.category === 'Exercise' ? 'selected' : '' %>>Exercise</option>
+                            <option value="Fitness" <%= filters.category === 'Fitness' ? 'selected' : '' %>>Fitness</option>
+                            <option value="Medical" <%= filters.category === 'Medical' ? 'selected' : '' %>>Medical</option>
+                            <option value="Mental Health" <%= filters.category === 'Mental Health' ? 'selected' : '' %>>Mental Health</option>
+                        </optgroup>
+                        <optgroup label="Financial">
+                            <option value="Finance" <%= filters.category === 'Finance' ? 'selected' : '' %>>Finance</option>
+                            <option value="Banking" <%= filters.category === 'Banking' ? 'selected' : '' %>>Banking</option>
+                            <option value="Investments" <%= filters.category === 'Investments' ? 'selected' : '' %>>Investments</option>
+                            <option value="Bills" <%= filters.category === 'Bills' ? 'selected' : '' %>>Bills</option>
+                            <option value="Taxes" <%= filters.category === 'Taxes' ? 'selected' : '' %>>Taxes</option>
+                        </optgroup>
+                        <optgroup label="Learning & Development">
+                            <option value="Education" <%= filters.category === 'Education' ? 'selected' : '' %>>Education</option>
+                            <option value="Learning" <%= filters.category === 'Learning' ? 'selected' : '' %>>Learning</option>
+                            <option value="Courses" <%= filters.category === 'Courses' ? 'selected' : '' %>>Courses</option>
+                            <option value="Skills" <%= filters.category === 'Skills' ? 'selected' : '' %>>Skills</option>
+                            <option value="Reading" <%= filters.category === 'Reading' ? 'selected' : '' %>>Reading</option>
+                        </optgroup>
+                        <optgroup label="Daily Tasks">
+                            <option value="Shopping" <%= filters.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
+                            <option value="Errands" <%= filters.category === 'Errands' ? 'selected' : '' %>>Errands</option>
+                            <option value="Household" <%= filters.category === 'Household' ? 'selected' : '' %>>Household</option>
+                            <option value="Chores" <%= filters.category === 'Chores' ? 'selected' : '' %>>Chores</option>
+                            <option value="Maintenance" <%= filters.category === 'Maintenance' ? 'selected' : '' %>>Maintenance</option>
+                        </optgroup>
+                        <optgroup label="Travel & Transportation">
+                            <option value="Travel" <%= filters.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+                            <option value="Transportation" <%= filters.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                            <option value="Vacation" <%= filters.category === 'Vacation' ? 'selected' : '' %>>Vacation</option>
+                            <option value="Commute" <%= filters.category === 'Commute' ? 'selected' : '' %>>Commute</option>
+                        </optgroup>
+                        <optgroup label="Entertainment & Hobbies">
+                            <option value="Entertainment" <%= filters.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                            <option value="Hobbies" <%= filters.category === 'Hobbies' ? 'selected' : '' %>>Hobbies</option>
+                            <option value="Sports" <%= filters.category === 'Sports' ? 'selected' : '' %>>Sports</option>
+                            <option value="Games" <%= filters.category === 'Games' ? 'selected' : '' %>>Games</option>
+                            <option value="Movies" <%= filters.category === 'Movies' ? 'selected' : '' %>>Movies</option>
+                        </optgroup>
+                        <optgroup label="Technology">
+                            <option value="Technology" <%= filters.category === 'Technology' ? 'selected' : '' %>>Technology</option>
+                            <option value="Software" <%= filters.category === 'Software' ? 'selected' : '' %>>Software</option>
+                            <option value="Apps" <%= filters.category === 'Apps' ? 'selected' : '' %>>Apps</option>
+                            <option value="Hardware" <%= filters.category === 'Hardware' ? 'selected' : '' %>>Hardware</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                            <option value="Miscellaneous" <%= filters.category === 'Miscellaneous' ? 'selected' : '' %>>Miscellaneous</option>
+                            <option value="Goals" <%= filters.category === 'Goals' ? 'selected' : '' %>>Goals</option>
+                            <option value="Planning" <%= filters.category === 'Planning' ? 'selected' : '' %>>Planning</option>
+                            <option value="Ideas" <%= filters.category === 'Ideas' ? 'selected' : '' %>>Ideas</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" name="priority">
+                        <option value="">All Priorities</option>
+                        <option value="low" <%= filters.priority === 'low' ? 'selected' : '' %>>Low</option>
+                        <option value="medium" <%= filters.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+                        <option value="high" <%= filters.priority === 'high' ? 'selected' : '' %>>High</option>
+                        <option value="urgent" <%= filters.priority === 'urgent' ? 'selected' : '' %>>Urgent</option>
+                    </select>
+                </div>
+                <div class="col-md-12 mt-3">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="/activities" class="btn btn-outline-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activities List -->
+    <!-- Activities List -->
+    <div class="row">
+        <% if (activities && activities.length > 0) { %>
+            <% activities.forEach(activity => { %>
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="activity-card card h-100 <%= activity.is_completed ? 'completed-activity' : '' %> <%= activity.due_date && new Date(activity.due_date) < new Date() && !activity.is_completed ? 'overdue-activity' : '' %> clickable-card" data-activity-id="<%= activity.id %>"<% if (activity.type === 'timed' && activity.end_time) { %> data-end-time="<%= activity.end_time %>"<% } %><% if (activity.type === 'timed' && activity.start_time) { %> data-start-time="<%= activity.start_time %>"<% } %> style="cursor: pointer;">
+                        <!-- Card Header with Priority and Type -->
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <% let priorityColor = '#6c757d'; %>
+                                <% if (activity.priority === 'urgent') priorityColor = '#dc3545'; %>
+                                <% if (activity.priority === 'high') priorityColor = '#fd7e14'; %>
+                                <% if (activity.priority === 'medium') priorityColor = '#0dcaf0'; %>
+                                <% if (activity.priority === 'low') priorityColor = '#198754'; %>
+                                <div class="priority-indicator" style="background-color: <%= priorityColor %>"></div>
+                                <span class="text-capitalize fw-bold"><%= activity.priority %></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <% let typeIcon = 'bi-list-task'; %>
+                                <% let typeColor = 'text-secondary'; %>
+                                <% if (activity.type === 'payment') { typeIcon = 'bi-credit-card'; typeColor = 'text-success'; } %>
+                                <% if (activity.type === 'purchase') { typeIcon = 'bi-cart'; typeColor = 'text-primary'; } %>
+                                <% if (activity.type === 'recurring') { typeIcon = 'bi-arrow-repeat'; typeColor = 'text-info'; } %>
+                                <% if (activity.type === 'timed') { typeIcon = 'bi-clock'; typeColor = 'text-warning'; } %>
+                                <i class="<%= typeIcon %> <%= typeColor %> me-1"></i>
+                                <span class="badge bg-light text-dark text-capitalize"><%= activity.type %></span>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <!-- Title and Description -->
+                            <h6 class="card-title mb-2 fw-bold">
+                                <a href="/activities/<%= activity.id %>" class="text-decoration-none text-dark">
+                                    <%= activity.title %>
+                                </a>
+                            </h6>
+                            <% if (activity.description) { %>
+                                <p class="card-text text-muted small mb-3">
+                                    <%= activity.description.length > 100 ? activity.description.substring(0, 100) + '...' : activity.description %>
+                                </p>
+                            <% } %>
+
+                            <!-- Progress Bar -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">Time Progress</small>
+                                    <% 
+                                        let timeProgressText = '0%';
+                                        let timeLeft = null;
+                                        
+                                        // For timed activities, use start_time and end_time
+                                        if (activity.type === 'timed' && activity.start_time && activity.end_time) {
+                                            const now = new Date();
+                                            const endTime = new Date(activity.end_time);
+                                            timeLeft = endTime - now;
+                                            
+                                            if (timeLeft > 0) {
+                                                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                                                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                                
+                                                let timeDisplay = '';
+                                                if (days > 0) timeDisplay += `${days}d `;
+                                                if (hours > 0) timeDisplay += `${hours}h `;
+                                                if (minutes > 0) timeDisplay += `${minutes}m`;
+                                                if (!timeDisplay) timeDisplay = '<1m';
+                                                
+                                                timeProgressText = timeDisplay + ' left';
+                                            } else {
+                                                timeProgressText = 'Expired';
+                                            }
+                                        }
+                                        // For all other activities, use created_at and due_date for time calculation
+                                        else if (activity.due_date) {
+                                            const now = new Date();
+                                            const createdDate = new Date(activity.created_at);
+                                            const dueDate = new Date(activity.due_date);
+                                            const totalDuration = dueDate - createdDate;
+                                            const elapsed = now - createdDate;
+                                            timeLeft = dueDate - now;
+                                            
+                                            if (timeLeft > 0) {
+                                                // Calculate time-based progress percentage
+                                                const timeProgress = Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
+                                                
+                                                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                                                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                                
+                                                if (days > 0) {
+                                                    timeProgressText = `${days}d ${hours}h ${minutes}m left (${timeProgress}%)`;
+                                                } else if (hours > 0) {
+                                                    timeProgressText = `${hours}h ${minutes}m left (${timeProgress}%)`;
+                                                } else if (minutes > 0) {
+                                                    timeProgressText = `${minutes}m left (${timeProgress}%)`;
+                                                } else {
+                                                    timeProgressText = `<1m left (${timeProgress}%)`;
+                                                }
+                                            } else {
+                                                timeProgressText = 'Overdue';
+                                            }
+                                        } else {
+                                            // Fallback to manual progress percentage
+                                            timeProgressText = (activity.progress_percentage || 0) + '%';
+                                        }
+                                    %>
+                                    <small class="fw-bold <%= timeLeft !== null && timeLeft <= 0 ? 'text-danger' : 'text-info' %>">
+                                        <%= timeProgressText %>
+                                    </small>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <% let progressColor = 'bg-secondary'; %>
+                                    <% let displayProgress = activity.progress_percentage || 0; %>
+                                    
+                                    <% if (activity.type === 'timed' && activity.start_time && activity.end_time) { %>
+                                        <% 
+                                            const now = new Date();
+                                            const startTime = new Date(activity.start_time);
+                                            const endTime = new Date(activity.end_time);
+                                            const totalDuration = endTime - startTime;
+                                            const elapsed = now - startTime;
+                                            
+                                            if (now < startTime) {
+                                                displayProgress = 0;
+                                                progressColor = 'bg-secondary';
+                                            } else if (now > endTime) {
+                                                displayProgress = 100;
+                                                progressColor = activity.is_completed ? 'bg-success' : 'bg-danger';
+                                            } else {
+                                                displayProgress = Math.round((elapsed / totalDuration) * 100);
+                                                progressColor = 'bg-warning';
+                                            }
+                                        %>
+                                    <% } else if (activity.due_date) { %>
+                                        <% 
+                                            // Calculate time-based progress for regular activities with due dates
+                                            const now = new Date();
+                                            const createdDate = new Date(activity.created_at);
+                                            const dueDate = new Date(activity.due_date);
+                                            const totalDuration = dueDate - createdDate;
+                                            const elapsed = now - createdDate;
+                                            
+                                            if (now < createdDate) {
+                                                displayProgress = 0;
+                                                progressColor = 'bg-secondary';
+                                            } else if (now > dueDate) {
+                                                displayProgress = 100;
+                                                progressColor = activity.is_completed ? 'bg-success' : 'bg-danger';
+                                            } else {
+                                                displayProgress = Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
+                                                if (displayProgress >= 75) {
+                                                    progressColor = 'bg-warning'; // Getting close to deadline
+                                                } else if (displayProgress >= 50) {
+                                                    progressColor = 'bg-info';
+                                                } else {
+                                                    progressColor = 'bg-primary';
+                                                }
+                                            }
+                                        %>
+                                    <% } else { %>
+                                        <% 
+                                            // Fallback to manual progress for activities without due dates
+                                            if (displayProgress >= 75) { 
+                                                progressColor = 'bg-success'; 
+                                            } else if (displayProgress >= 50) { 
+                                                progressColor = 'bg-info'; 
+                                            } else if (displayProgress >= 25) { 
+                                                progressColor = 'bg-warning'; 
+                                            }
+                                        %>
+                                    <% } %>
+                                    
+                                    <div class="progress-bar <%= progressColor %>" role="progressbar" style="width: <%= displayProgress %>%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Due Date and Status -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="due-date">
+                                    <% if (activity.type === 'timed' && activity.start_time && activity.end_time) { %>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            <%= new Date(activity.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %> 
+                                            <%= new Date(activity.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %>
+                                            - 
+                                            <%= new Date(activity.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %>
+                                        </small>
+                                        <% 
+                                            const now = new Date();
+                                            const endTime = new Date(activity.end_time);
+                                            const timeLeft = endTime - now;
+                                        %>
+                                        <% if (timeLeft > 0) { %>
+                                            <% 
+                                                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                                                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                                
+                                                let timeDisplay = '';
+                                                if (days > 0) timeDisplay += `${days}d `;
+                                                if (hours > 0) timeDisplay += `${hours}h `;
+                                                if (minutes > 0) timeDisplay += `${minutes}m`;
+                                                if (!timeDisplay) timeDisplay = 'Less than 1m';
+                                            %>
+                                            <div><small class="text-info fw-bold time-remaining" data-end-time="<%= activity.end_time %>">
+                                                <i class="bi bi-hourglass-split me-1"></i>
+                                                <%= timeDisplay %> remaining
+                                            </small></div>
+                                        <% } else { %>
+                                            <div><small class="text-danger fw-bold">
+                                                <i class="bi bi-hourglass-bottom me-1"></i>
+                                                Time expired
+                                            </small></div>
+                                        <% } %>
+                                    <% } else if (activity.due_date) { %>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-event me-1"></i>
+                                            <%= new Date(activity.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                                        </small>
+                                    <% } else { %>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-x me-1"></i>
+                                            No due date
+                                        </small>
+                                    <% } %>
+                                </div>
+                                <div class="status">
+                                    <% if (activity.type === 'timed' && activity.start_time && activity.end_time) { %>
+                                        <% 
+                                            const now = new Date();
+                                            const startTime = new Date(activity.start_time);
+                                            const endTime = new Date(activity.end_time);
+                                            const timeLeft = endTime - now;
+                                        %>
+                                        
+                                        <% if (activity.is_completed) { %>
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>Completed
+                                            </span>
+                                        <% } else if (now < startTime) { %>
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-clock me-1"></i>Pending
+                                            </span>
+                                        <% } else if (now > endTime) { %>
+                                            <span class="badge bg-danger overdue-task" data-activity-id="<%= activity.id %>">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Overdue
+                                            </span>
+                                        <% } else { %>
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-play-circle me-1"></i>In Progress
+                                            </span>
+                                        <% } %>
+                                    <% } else { %>
+                                        <% if (activity.is_completed) { %>
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>Completed
+                                            </span>
+                                        <% } else if (activity.due_date && new Date(activity.due_date) < new Date()) { %>
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Overdue
+                                            </span>
+                                        <% } else if (activity.progress_percentage > 0) { %>
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-clock me-1"></i>In Progress
+                                            </span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-pause-circle me-1"></i>Pending
+                                            </span>
+                                        <% } %>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <!-- Amount for Payment/Purchase Types -->
+                            <% if (activity.type === 'payment' || activity.type === 'purchase') { %>
+                                <div class="amount-info mb-3">
+                                    <div class="row">
+                                        <% if (activity.type === 'payment') { %>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">Total Amount</small>
+                                                <span class="fw-bold text-success">$<%= parseFloat(activity.total_amount || 0).toFixed(2) %></span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">Remaining</small>
+                                                <span class="fw-bold text-danger">$<%= parseFloat(activity.remaining_amount || 0).toFixed(2) %></span>
+                                            </div>
+                                        <% } else { %>
+                                            <div class="col-12">
+                                                <small class="text-muted d-block">Target Item</small>
+                                                <span class="fw-bold"><%= activity.target_item || 'Not specified' %></span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Card Footer with Actions -->
+                        <div class="card-footer bg-transparent">
+                            <div class="row g-1">
+                                <!-- Edit Button -->
+                                <div class="col-6">
+                                    <a href="/activities/<%= activity.id %>/edit" class="btn btn-outline-primary btn-sm w-100" title="Edit Activity">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                </div>
+                                <!-- View Button -->
+                                <div class="col-6">
+                                    <a href="/activities/<%= activity.id %>" class="btn btn-outline-info btn-sm w-100" title="View Details">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-list-task display-1 text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">No Activities Found</h4>
+                    <p class="text-muted">Get started by creating your first activity!</p>
+                    <a href="/activities/create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Create Your First Activity
+                    </a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+    <!-- Pagination -->
+    <% if (pagination && pagination.totalPages > 1) { %>
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <% if (pagination.currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&<%= new URLSearchParams(filters).toString() %>">Previous</a>
+                    </li>
+                <% } %>
+                
+                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                    <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>&<%= new URLSearchParams(filters).toString() %>"><%= i %></a>
+                    </li>
+                <% } %>
+                
+                <% if (pagination.currentPage < pagination.totalPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>&<%= new URLSearchParams(filters).toString() %>">Next</a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    <% } %>
+</div>
+
+<!-- Enhanced JavaScript for Activity Actions -->
+<script>
+// Test function to check if JavaScript is working
+function testJS() {
+    console.log('JavaScript is working!');
+    showToast('Test', 'JavaScript is working correctly', 'success');
+}
+
+// Add global error handler
+window.addEventListener('error', function(e) {
+    console.error('Global error:', e.error);
+});
+
+// Function to show fallback forms if JS fails
+function showFallbackForms(activityId) {
+    const fallbackDiv = document.getElementById(`fallback-forms-${activityId}`);
+    if (fallbackDiv) {
+        fallbackDiv.style.display = 'block';
+    }
+}
+
+// Check if fetch is available
+if (!window.fetch) {
+    console.warn('Fetch API not available, using fallback forms');
+    // Show all fallback forms
+    document.addEventListener('DOMContentLoaded', function() {
+        const fallbackForms = document.querySelectorAll('[id^="fallback-forms-"]');
+        fallbackForms.forEach(form => form.style.display = 'block');
+    });
+}
+
+// Check for overdue timed tasks and prompt user
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle clickable card navigation
+    document.querySelectorAll('.clickable-card[data-activity-id]').forEach(card => {
+        card.addEventListener('click', function(event) {
+            // Only navigate if the click target is not a button or form element
+            if (!event.target.closest('.btn, button, input, select, textarea, .dropdown')) {
+                const activityId = this.getAttribute('data-activity-id');
+                if (activityId) {
+                    window.location.href = `/activities/${activityId}`;
+                }
+            }
+        });
+    });
+    
+    // Prevent button clicks from triggering card clicks (backup)
+    document.querySelectorAll('.clickable-card .btn, .clickable-card button, .clickable-card .dropdown').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    });
+    
+    const overdueTasks = document.querySelectorAll('.overdue-task[data-activity-id]');
+    
+    if (overdueTasks.length > 0) {
+        // Wait a bit for page to load, then check for overdue tasks
+        setTimeout(() => {
+            overdueTasks.forEach(badge => {
+                const activityId = badge.getAttribute('data-activity-id');
+                const activityCard = badge.closest('.activity-card');
+                const activityTitle = activityCard.querySelector('.activity-title')?.textContent || 'Activity';
+                
+                // Add visual indicator
+                activityCard.classList.add('border-danger', 'shadow-lg');
+                
+                // Show overdue prompt after a delay
+                setTimeout(() => {
+                    showOverduePrompt(activityId, activityTitle);
+                }, 1000 * Math.random() * 5); // Random delay to avoid multiple prompts at once
+            });
+        }, 2000);
+    }
+});
+
+// Function to show overdue task prompt
+function showOverduePrompt(activityId, activityTitle) {
+    // Create a custom modal for better UX
+    const modalHtml = `
+        <div class="modal fade" id="overdueModal-${activityId}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Time's Up!
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-clock-history text-danger" style="font-size: 3rem;"></i>
+                        </div>
+                        <h6 class="text-center">"${activityTitle}"</h6>
+                        <p class="text-center text-muted">The time allocated for this task has expired.</p>
+                        <p class="text-center"><strong>Have you completed this task?</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Not Yet
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="markAsCompleteFromModal('${activityId}')">
+                            <i class="bi bi-check-circle me-1"></i>Yes, Mark Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById(`overdueModal-${activityId}`));
+    modal.show();
+    
+    // Clean up modal after it's hidden
+    document.getElementById(`overdueModal-${activityId}`).addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+
+
+// Function to format time remaining for timed activities
+function formatTimeRemaining(endTime) {
+    const now = new Date();
+    const timeLeft = new Date(endTime) - now;
+    
+    if (timeLeft <= 0) {
+        return 'Time expired';
+    }
+    
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    
+    let timeDisplay = '';
+    if (days > 0) timeDisplay += `${days}d `;
+    if (hours > 0) timeDisplay += `${hours}h `;
+    if (minutes > 0) timeDisplay += `${minutes}m`;
+    if (!timeDisplay) timeDisplay = 'Less than 1m';
+    
+    return timeDisplay + ' remaining';
+}
+
+// Update time displays every minute for timed activities
+setInterval(() => {
+    const timedActivities = document.querySelectorAll('[data-end-time]');
+    timedActivities.forEach(element => {
+        const endTime = element.getAttribute('data-end-time');
+        const timeDisplay = element.querySelector('.time-remaining');
+        if (timeDisplay) {
+            const newTimeText = formatTimeRemaining(endTime);
+            timeDisplay.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>${newTimeText}`;
+            
+            // Check if task just became overdue
+            if (newTimeText === 'Time expired') {
+                const activityCard = element.closest('.activity-card');
+                const statusBadge = activityCard.querySelector('.status .badge');
+                const activityId = activityCard.querySelector('[data-activity-id]')?.getAttribute('data-activity-id');
+                const activityTitle = activityCard.querySelector('.activity-title')?.textContent || 'Activity';
+                
+                if (statusBadge && !statusBadge.classList.contains('bg-danger')) {
+                    // Update status to overdue
+                    statusBadge.className = 'badge bg-danger overdue-task';
+                    statusBadge.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Overdue';
+                    statusBadge.setAttribute('data-activity-id', activityId);
+                    
+                    // Add visual indicators
+                    activityCard.classList.add('border-danger', 'shadow-lg');
+                    
+                    // Show overdue prompt
+                    setTimeout(() => {
+                        showOverduePrompt(activityId, activityTitle);
+                    }, 2000);
+                }
+            }
+        }
+    });
+    
+    // Update progress bars for timed activities
+    const timedProgressBars = document.querySelectorAll('[data-end-time] .progress-bar');
+    timedProgressBars.forEach(progressBar => {
+        const activityCard = progressBar.closest('[data-end-time]');
+        const endTime = activityCard.getAttribute('data-end-time');
+        const startTimeElement = activityCard.querySelector('[data-start-time]');
+        
+        if (startTimeElement) {
+            const now = new Date();
+            const startTime = new Date(startTimeElement.getAttribute('data-start-time'));
+            const endTimeDate = new Date(endTime);
+            const totalDuration = endTimeDate - startTime;
+            const elapsed = now - startTime;
+            
+            let progress = 0;
+            if (now < startTime) {
+                progress = 0;
+                progressBar.className = 'progress-bar bg-secondary';
+            } else if (now > endTimeDate) {
+                progress = 100;
+                progressBar.className = 'progress-bar bg-danger';
+            } else {
+                progress = Math.round((elapsed / totalDuration) * 100);
+                progressBar.className = 'progress-bar bg-warning';
+            }
+            
+            progressBar.style.width = progress + '%';
+        }
+    });
+}, 10000); // Update every 10 seconds for real-time feel
+
+
+
+
+
+
+
+// Duplicate Activity
+function duplicateActivity(activityId) {
+    const btn = event.target.closest('button');
+    const originalHtml = btn.innerHTML;
+    btn.classList.add('btn-loading');
+    btn.innerHTML = '';
+    
+    fetch(`/activities/${activityId}/duplicate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            btn.classList.remove('btn-loading');
+            btn.innerHTML = '<i class="bi bi-check"></i>';
+            btn.classList.add('btn-success');
+            
+            showToast('Success', 'Activity duplicated successfully', 'success');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            throw new Error(data.message || 'Failed to duplicate activity');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        btn.classList.remove('btn-loading');
+        btn.innerHTML = originalHtml;
+        showToast('Error', 'Failed to duplicate activity', 'error');
+    });
+}
+
+// Utility function to show toast notifications
+function showToast(title, message, type = 'info') {
+    // Create toast element
+    const toastHtml = `
+        <div class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary'} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <strong>${title}:</strong> ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    // Create or get toast container
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Add toast to container
+    const toastWrapper = document.createElement('div');
+    toastWrapper.innerHTML = toastHtml;
+    const toastElement = toastWrapper.firstElementChild;
+    toastContainer.appendChild(toastElement);
+    
+    // Show toast
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+    
+    // Remove from DOM after hiding
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+// Enhanced filter form submission
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter changes
+    const filterForm = document.querySelector('form[action="/activities"]');
+    if (filterForm) {
+        const inputs = filterForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        });
+    }
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + N for new activity
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = '/activities/create';
+        }
+    });
+});
+</script>
+
+<%- include('../partials/footer') %>

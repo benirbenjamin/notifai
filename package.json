@@ -1,0 +1,27 @@
+{
+  "name": "notifai-space-workspace",
+  "version": "2.0.0",
+  "description": "Notifai space - Smart Activity & Task Management with Neon DB, Flutterwave, React, and React Native",
+  "scripts": {
+    "setup": "npm --prefix backend install && npm --prefix web install",
+    "dev:backend": "cd backend && npm start",
+    "dev:web": "cd web && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "db:setup": "cd backend && npm run db:setup",
+    "test:reminders": "cd backend && npm run test:reminders"
+  },
+  "keywords": [
+    "notifai",
+    "tasks",
+    "activity-manager",
+    "neon-db",
+    "postgresql",
+    "flutterwave",
+    "react",
+    "react-native",
+    "expo",
+    "render"
+  ],
+  "author": "Notifai space Team",
+  "license": "MIT"
+}

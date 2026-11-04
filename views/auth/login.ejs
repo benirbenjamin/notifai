@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+
+<div class="auth-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="auth-card">
+          <div class="text-center mb-4">
+            <h1 class="h3 mb-3">Welcome to Managinga Space</h1>
+            <p class="text-muted">Sign in with your Google account to get started</p>
+          </div>
+
+          <!-- Google Sign In Button -->
+          <div class="d-grid mb-4">
+            <a href="/auth/google" class="btn btn-google btn-lg">
+              <i class="fab fa-google me-2"></i>
+              Continue with Google
+            </a>
+          </div>
+
+          <div class="text-center">
+            <small class="text-muted">
+              By continuing, you agree to our 
+              <a href="#" class="text-decoration-none">Terms of Service</a> and 
+              <a href="#" class="text-decoration-none">Privacy Policy</a>
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.auth-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.btn-google {
+  background-color: #4285f4;
+  border-color: #4285f4;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-google:hover {
+  background-color: #3367d6;
+  border-color: #3367d6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.btn-google:focus {
+  background-color: #3367d6;
+  border-color: #3367d6;
+  color: white;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+}
+</style>
+
+<%- include('../partials/footer') %>

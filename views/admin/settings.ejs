@@ -1,0 +1,374 @@
+<%- include('../partials/admin-header', { title: 'App Settings' }) %>
+
+<div class="admin-container">
+    <%- include('../partials/admin-sidebar', { page: 'settings' }) %>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">App Settings</h1>
+                    <p class="text-muted mb-0">Configure application settings and preferences</p>
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-success" onclick="saveAllSettings()">
+                        <i class="bi bi-check-circle me-1"></i>Save All Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- General Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-gear me-2"></i>General Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="generalSettingsForm">
+                            <div class="mb-3">
+                                <label for="appName" class="form-label">Application Name</label>
+                                <input type="text" class="form-control" id="appName" name="app_name" value="<%= settings.app_name || 'Managinga Space' %>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="appDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="appDescription" name="app_description" rows="3"><%= settings.app_description || '' %></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="supportEmail" class="form-label">Support Email</label>
+                                <input type="email" class="form-control" id="supportEmail" name="support_email" value="<%= settings.support_email || '' %>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="defaultTimezone" class="form-label">Default Timezone</label>
+                                <select class="form-select" id="defaultTimezone" name="default_timezone">
+                                    <option value="UTC" <%= settings.default_timezone === 'UTC' ? 'selected' : '' %>>UTC</option>
+                                    <option value="America/New_York" <%= settings.default_timezone === 'America/New_York' ? 'selected' : '' %>>Eastern Time</option>
+                                    <option value="America/Chicago" <%= settings.default_timezone === 'America/Chicago' ? 'selected' : '' %>>Central Time</option>
+                                    <option value="America/Denver" <%= settings.default_timezone === 'America/Denver' ? 'selected' : '' %>>Mountain Time</option>
+                                    <option value="America/Los_Angeles" <%= settings.default_timezone === 'America/Los_Angeles' ? 'selected' : '' %>>Pacific Time</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="maintenanceMode" name="maintenance_mode" <%= settings.maintenance_mode ? 'checked' : '' %>>
+                                <label class="form-check-label" for="maintenanceMode">
+                                    Maintenance Mode
+                                </label>
+                                <small class="form-text text-muted d-block">Prevents new user registrations and shows maintenance message</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-bell me-2"></i>Notification Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="notificationSettingsForm">
+                            <div class="mb-3">
+                                <label for="emailFromName" class="form-label">Email From Name</label>
+                                <input type="text" class="form-control" id="emailFromName" name="email_from_name" value="<%= settings.email_from_name || 'Managinga Space' %>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="emailFromAddress" class="form-label">Email From Address</label>
+                                <input type="email" class="form-control" id="emailFromAddress" name="email_from_address" value="<%= settings.email_from_address || '' %>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="reminderFrequency" class="form-label">Default Reminder Frequency</label>
+                                <select class="form-select" id="reminderFrequency" name="reminder_frequency">
+                                    <option value="daily" <%= settings.reminder_frequency === 'daily' ? 'selected' : '' %>>Daily</option>
+                                    <option value="weekly" <%= settings.reminder_frequency === 'weekly' ? 'selected' : '' %>>Weekly</option>
+                                    <option value="monthly" <%= settings.reminder_frequency === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableEmailNotifications" name="enable_email_notifications" <%= settings.enable_email_notifications ? 'checked' : '' %>>
+                                <label class="form-check-label" for="enableEmailNotifications">
+                                    Enable Email Notifications
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enablePushNotifications" name="enable_push_notifications" <%= settings.enable_push_notifications ? 'checked' : '' %>>
+                                <label class="form-check-label" for="enablePushNotifications">
+                                    Enable Push Notifications
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-gem me-2"></i>Premium Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="premiumSettingsForm">
+                            <div class="mb-3">
+                                <label for="premiumPrice" class="form-label">Premium Price (USD)</label>
+                                <input type="number" class="form-control" id="premiumPrice" name="premium_price" value="10" min="1" max="999" step="0.01">
+                                <small class="form-text text-muted">One-time lifetime payment</small>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enablePayments" name="enable_payments" checked>
+                                <label class="form-check-label" for="enablePayments">
+                                    Enable premium upgrades
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sendUpgradeEmails" name="send_upgrade_emails" checked>
+                                <label class="form-check-label" for="sendUpgradeEmails">
+                                    Send upgrade confirmation emails
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-shield-check me-2"></i>Security Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="securitySettingsForm">
+                            <div class="mb-3">
+                                <label for="sessionTimeout" class="form-label">Session Timeout (hours)</label>
+                                <input type="number" class="form-control" id="sessionTimeout" name="session_timeout" value="<%= settings.session_timeout || 24 %>" min="1" max="168">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="passwordMinLength" class="form-label">Minimum Password Length</label>
+                                <input type="number" class="form-control" id="passwordMinLength" name="password_min_length" value="<%= settings.password_min_length || 8 %>" min="6" max="20">
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="requirePasswordComplexity" name="require_password_complexity" <%= settings.require_password_complexity ? 'checked' : '' %>>
+                                <label class="form-check-label" for="requirePasswordComplexity">
+                                    Require password complexity (uppercase, lowercase, numbers)
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableTwoFactor" name="enable_two_factor" <%= settings.enable_two_factor ? 'checked' : '' %>>
+                                <label class="form-check-label" for="enableTwoFactor">
+                                    Enable Two-Factor Authentication
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="logSecurityEvents" name="log_security_events" <%= settings.log_security_events ? 'checked' : '' %>>
+                                <label class="form-check-label" for="logSecurityEvents">
+                                    Log security events
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Upload Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-file-earmark-arrow-up me-2"></i>File Upload Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="fileSettingsForm">
+                            <div class="mb-3">
+                                <label for="maxFileSize" class="form-label">Maximum File Size (MB)</label>
+                                <input type="number" class="form-control" id="maxFileSize" name="max_file_size" value="<%= settings.max_file_size || 10 %>" min="1" max="100">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="allowedFileTypes" class="form-label">Allowed File Types</label>
+                                <input type="text" class="form-control" id="allowedFileTypes" name="allowed_file_types" value="<%= settings.allowed_file_types || 'jpg,jpeg,png,gif,pdf,doc,docx,txt' %>" placeholder="jpg,jpeg,png,gif,pdf">
+                                <small class="form-text text-muted">Comma-separated list of file extensions</small>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enableFileUploads" name="enable_file_uploads" <%= settings.enable_file_uploads ? 'checked' : '' %>>
+                                <label class="form-check-label" for="enableFileUploads">
+                                    Enable file uploads
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Settings -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-code-square me-2"></i>API Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="apiSettingsForm">
+                            <div class="mb-3">
+                                <label for="rateLimitRequests" class="form-label">Rate Limit (requests per minute)</label>
+                                <input type="number" class="form-control" id="rateLimitRequests" name="rate_limit_requests" value="<%= settings.rate_limit_requests || 100 %>" min="10" max="1000">
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableApiAccess" name="enable_api_access" <%= settings.enable_api_access ? 'checked' : '' %>>
+                                <label class="form-check-label" for="enableApiAccess">
+                                    Enable API access
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requireApiKey" name="require_api_key" <%= settings.require_api_key ? 'checked' : '' %>>
+                                <label class="form-check-label" for="requireApiKey">
+                                    Require API key for access
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-warning me-2" onclick="resetToDefaults()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Reset to Defaults
+                                </button>
+                                <button class="btn btn-info" onclick="exportSettings()">
+                                    <i class="bi bi-download me-1"></i>Export Settings
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-secondary me-2" onclick="cancelChanges()">
+                                    Cancel
+                                </button>
+                                <button class="btn btn-success" onclick="saveAllSettings()">
+                                    <i class="bi bi-check-circle me-1"></i>Save All Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function saveAllSettings() {
+    const forms = [
+        'generalSettingsForm',
+        'notificationSettingsForm', 
+        'trialSettingsForm',
+        'securitySettingsForm',
+        'fileSettingsForm',
+        'apiSettingsForm'
+    ];
+    
+    const allSettings = {};
+    
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        const formData = new FormData(form);
+        
+        for (let [key, value] of formData.entries()) {
+            allSettings[key] = value;
+        }
+    });
+    
+    // Add checkbox values that might not be in FormData
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        allSettings[checkbox.name] = checkbox.checked;
+    });
+    
+    // Save settings via API
+    fetch('/admin/settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(allSettings)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Settings saved successfully', 'success');
+        } else {
+            showToast('Error saving settings: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error saving settings', 'error');
+    });
+}
+
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all settings to their default values?')) {
+        fetch('/admin/settings/reset', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Settings reset to defaults', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast('Error resetting settings', 'error');
+            }
+        });
+    }
+}
+
+function exportSettings() {
+    window.location.href = '/admin/settings/export';
+}
+
+function cancelChanges() {
+    window.location.reload();
+}
+
+function showToast(message, type) {
+    // Implementation depends on your toast system
+    console.log(`${type.toUpperCase()}: ${message}`);
+}
+</script>
+
+<%- include('../partials/admin-footer') %>

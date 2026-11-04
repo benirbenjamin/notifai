@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Dashboard' %> - <%= typeof appName !== 'undefined' ? appName : 'Managinga Space' %></title>
+    
+    <!-- Meta tags for PWA -->
+    <meta name="description" content="Smart Activity Manager with Advanced Features">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="<%= typeof appName !== 'undefined' ? appName : 'Managinga Space' %>">
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIiB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiI+CiAgPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiMwMDdiZmYiIHJ4PSIyNCIvPgogIDxjaXJjbGUgY3g9Ijk2IiBjeT0iNzAiIHI9IjIwIiBmaWxsPSJ3aGl0ZSIvPgogIDxyZWN0IHg9IjY2IiB5PSIxMDAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiBmaWxsPSJ3aGl0ZSIgcng9IjQiLz4KICA8cmVjdCB4PSI2NiIgeT0iMTIwIiB3aWR0aD0iNDUiIGhlaWdodD0iOCIgZmlsbD0id2hpdGUiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iNjYiIHk9IjE0MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjgiIGZpbGw9IndoaXRlIiByeD0iNCIvPgo8L3N2Zz4K">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link href="/css/app.css?v=<%= Date.now() %>" rel="stylesheet">
+    <link href="/css/auth.css?v=<%= Date.now() %>" rel="stylesheet">
+    
+    <!-- Admin CSS for admin pages -->
+    <% if (typeof title !== 'undefined' && (title.includes('Admin') || title.includes('admin'))) { %>
+    <link href="/css/admin.css?v=<%= Date.now() %>" rel="stylesheet">
+    <% } %>
+</head>
+<body>
+    <!-- Include navbar based on user role -->
+    <% if (user && (user.isAdmin || user.is_admin)) { %>
+        <%- include('admin-navbar') %>
+    <% } else { %>
+        <%- include('navbar-new') %>
+    <% } %>
+    
+    <!-- Main content area -->
+    <main class="main-content">
+        <!-- Flash Messages -->
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <% errors.forEach(error => { %>
+                    <div><%= error.msg %></div>
+                <% }) %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>

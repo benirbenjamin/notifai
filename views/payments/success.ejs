@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card border-success">
+        <div class="card-body text-center p-5">
+          <div class="mb-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+          </div>
+          
+          <h1 class="h2 text-success mb-3">Payment Successful!</h1>
+          
+          <p class="lead mb-4">
+            Thank you for your subscription! Your payment has been processed successfully.
+          </p>
+          
+          <% if (typeof subscription !== 'undefined' && subscription) { %>
+          <div class="alert alert-light mb-4">
+            <h5 class="alert-heading">Subscription Details</h5>
+            <hr>
+            <div class="row text-start">
+              <div class="col-6">
+                <strong>Plan:</strong>
+              </div>
+              <div class="col-6">
+                <%= subscription.planName || 'Premium Plan' %>
+              </div>
+              <div class="col-6">
+                <strong>Amount:</strong>
+              </div>
+              <div class="col-6">
+                $<%= subscription.amount || '0.00' %>
+              </div>
+              <div class="col-6">
+                <strong>Valid Until:</strong>
+              </div>
+              <div class="col-6">
+                <%= subscription.endDate ? new Date(subscription.endDate).toLocaleDateString() : 'N/A' %>
+              </div>
+              <% if (subscription.transactionId) { %>
+              <div class="col-6">
+                <strong>Transaction ID:</strong>
+              </div>
+              <div class="col-6">
+                <small class="text-muted"><%= subscription.transactionId %></small>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+          
+          <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a href="/dashboard" class="btn btn-primary me-md-2">
+              <i class="bi bi-house me-2"></i>Go to Dashboard
+            </a>
+            <a href="/activities" class="btn btn-outline-primary">
+              <i class="bi bi-list-task me-2"></i>View Activities
+            </a>
+          </div>
+          
+          <hr class="my-4">
+          
+          <p class="text-muted small mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            You will receive a confirmation email shortly. If you have any questions, 
+            please <a href="/contact">contact our support team</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.card {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+</style>
+
+<%- include('../partials/footer') %>

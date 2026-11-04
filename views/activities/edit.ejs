@@ -1,0 +1,328 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Error Messages -->
+            <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="alert-heading">Please fix the following errors:</h6>
+                    <ul class="mb-0">
+                        <% errors.forEach(error => { %>
+                            <li><%= error.msg %></li>
+                        <% }) %>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Edit Activity</h1>
+                <div class="btn-group">
+                    <a href="/activities/<%= activity.id %>" class="btn btn-outline-secondary">
+                        <i class="bi bi-eye me-1"></i>View
+                    </a>
+                    <a href="/activities" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Activities
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Activity Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="/activities/<%= activity.id %>" method="POST">
+                                <input type="hidden" name="_method" value="PUT">
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">Title *</label>
+                                            <input type="text" class="form-control" id="title" name="title" 
+                                                   value="<%= activity.title %>" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="type" class="form-label">Type *</label>
+                                            <select class="form-select" id="type" name="type" required>
+                                                <option value="general" <%= activity.type === 'general' ? 'selected' : '' %>>General</option>
+                                                <option value="payment" <%= activity.type === 'payment' ? 'selected' : '' %>>Payment</option>
+                                                <option value="purchase" <%= activity.type === 'purchase' ? 'selected' : '' %>>Purchase</option>
+                                                <option value="recurring" <%= activity.type === 'recurring' ? 'selected' : '' %>>Recurring</option>
+                                                <option value="timed" <%= activity.type === 'timed' ? 'selected' : '' %>>Timed Task</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3"><%= activity.description || '' %></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="category" class="form-label">Category</label>
+                                            <select class="form-select" id="category" name="category">
+                                                <option value="">Select a category...</option>
+                                                <optgroup label="Work & Business">
+                                                    <option value="Work" <%= activity.category === 'Work' ? 'selected' : '' %>>Work</option>
+                                                    <option value="Business" <%= activity.category === 'Business' ? 'selected' : '' %>>Business</option>
+                                                    <option value="Meetings" <%= activity.category === 'Meetings' ? 'selected' : '' %>>Meetings</option>
+                                                    <option value="Projects" <%= activity.category === 'Projects' ? 'selected' : '' %>>Projects</option>
+                                                    <option value="Career" <%= activity.category === 'Career' ? 'selected' : '' %>>Career</option>
+                                                </optgroup>
+                                                <optgroup label="Personal Life">
+                                                    <option value="Personal" <%= activity.category === 'Personal' ? 'selected' : '' %>>Personal</option>
+                                                    <option value="Family" <%= activity.category === 'Family' ? 'selected' : '' %>>Family</option>
+                                                    <option value="Friends" <%= activity.category === 'Friends' ? 'selected' : '' %>>Friends</option>
+                                                    <option value="Social" <%= activity.category === 'Social' ? 'selected' : '' %>>Social</option>
+                                                    <option value="Relationships" <%= activity.category === 'Relationships' ? 'selected' : '' %>>Relationships</option>
+                                                </optgroup>
+                                                <optgroup label="Health & Wellness">
+                                                    <option value="Health" <%= activity.category === 'Health' ? 'selected' : '' %>>Health</option>
+                                                    <option value="Exercise" <%= activity.category === 'Exercise' ? 'selected' : '' %>>Exercise</option>
+                                                    <option value="Fitness" <%= activity.category === 'Fitness' ? 'selected' : '' %>>Fitness</option>
+                                                    <option value="Medical" <%= activity.category === 'Medical' ? 'selected' : '' %>>Medical</option>
+                                                    <option value="Mental Health" <%= activity.category === 'Mental Health' ? 'selected' : '' %>>Mental Health</option>
+                                                </optgroup>
+                                                <optgroup label="Financial">
+                                                    <option value="Finance" <%= activity.category === 'Finance' ? 'selected' : '' %>>Finance</option>
+                                                    <option value="Banking" <%= activity.category === 'Banking' ? 'selected' : '' %>>Banking</option>
+                                                    <option value="Investments" <%= activity.category === 'Investments' ? 'selected' : '' %>>Investments</option>
+                                                    <option value="Bills" <%= activity.category === 'Bills' ? 'selected' : '' %>>Bills</option>
+                                                    <option value="Taxes" <%= activity.category === 'Taxes' ? 'selected' : '' %>>Taxes</option>
+                                                </optgroup>
+                                                <optgroup label="Learning & Development">
+                                                    <option value="Education" <%= activity.category === 'Education' ? 'selected' : '' %>>Education</option>
+                                                    <option value="Learning" <%= activity.category === 'Learning' ? 'selected' : '' %>>Learning</option>
+                                                    <option value="Courses" <%= activity.category === 'Courses' ? 'selected' : '' %>>Courses</option>
+                                                    <option value="Skills" <%= activity.category === 'Skills' ? 'selected' : '' %>>Skills</option>
+                                                    <option value="Reading" <%= activity.category === 'Reading' ? 'selected' : '' %>>Reading</option>
+                                                </optgroup>
+                                                <optgroup label="Daily Tasks">
+                                                    <option value="Shopping" <%= activity.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
+                                                    <option value="Errands" <%= activity.category === 'Errands' ? 'selected' : '' %>>Errands</option>
+                                                    <option value="Household" <%= activity.category === 'Household' ? 'selected' : '' %>>Household</option>
+                                                    <option value="Chores" <%= activity.category === 'Chores' ? 'selected' : '' %>>Chores</option>
+                                                    <option value="Maintenance" <%= activity.category === 'Maintenance' ? 'selected' : '' %>>Maintenance</option>
+                                                </optgroup>
+                                                <optgroup label="Travel & Transportation">
+                                                    <option value="Travel" <%= activity.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+                                                    <option value="Transportation" <%= activity.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                                                    <option value="Vacation" <%= activity.category === 'Vacation' ? 'selected' : '' %>>Vacation</option>
+                                                    <option value="Commute" <%= activity.category === 'Commute' ? 'selected' : '' %>>Commute</option>
+                                                </optgroup>
+                                                <optgroup label="Entertainment & Hobbies">
+                                                    <option value="Entertainment" <%= activity.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                                                    <option value="Hobbies" <%= activity.category === 'Hobbies' ? 'selected' : '' %>>Hobbies</option>
+                                                    <option value="Sports" <%= activity.category === 'Sports' ? 'selected' : '' %>>Sports</option>
+                                                    <option value="Games" <%= activity.category === 'Games' ? 'selected' : '' %>>Games</option>
+                                                    <option value="Movies" <%= activity.category === 'Movies' ? 'selected' : '' %>>Movies</option>
+                                                </optgroup>
+                                                <optgroup label="Technology">
+                                                    <option value="Technology" <%= activity.category === 'Technology' ? 'selected' : '' %>>Technology</option>
+                                                    <option value="Software" <%= activity.category === 'Software' ? 'selected' : '' %>>Software</option>
+                                                    <option value="Apps" <%= activity.category === 'Apps' ? 'selected' : '' %>>Apps</option>
+                                                    <option value="Hardware" <%= activity.category === 'Hardware' ? 'selected' : '' %>>Hardware</option>
+                                                </optgroup>
+                                                <optgroup label="Other">
+                                                    <option value="Miscellaneous" <%= activity.category === 'Miscellaneous' ? 'selected' : '' %>>Miscellaneous</option>
+                                                    <option value="Goals" <%= activity.category === 'Goals' ? 'selected' : '' %>>Goals</option>
+                                                    <option value="Planning" <%= activity.category === 'Planning' ? 'selected' : '' %>>Planning</option>
+                                                    <option value="Ideas" <%= activity.category === 'Ideas' ? 'selected' : '' %>>Ideas</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="priority" class="form-label">Priority</label>
+                                            <select class="form-select" id="priority" name="priority">
+                                                <option value="low" <%= activity.priority === 'low' ? 'selected' : '' %>>Low</option>
+                                                <option value="medium" <%= activity.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+                                                <option value="high" <%= activity.priority === 'high' ? 'selected' : '' %>>High</option>
+                                                <option value="urgent" <%= activity.priority === 'urgent' ? 'selected' : '' %>>Urgent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="due_date" class="form-label">Due Date</label>
+                                            <input type="datetime-local" class="form-control" id="due_date" name="due_date" 
+                                                   value="<%= activity.due_date ? activity.due_date.toString().slice(0, 16) : '' %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="total_amount" class="form-label">Amount</label>
+                                            <input type="number" step="0.01" class="form-control" id="total_amount" name="total_amount" 
+                                                   value="<%= activity.total_amount || '0' %>"
+                                                   placeholder="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Target Item Field (only for purchase type activities) -->
+                                <div class="row" id="targetItemRow" <% if (activity.type !== 'purchase') { %>style="display: none;"<% } %>>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label for="target_item" class="form-label">Target Item</label>
+                                            <input type="text" class="form-control" id="target_item" name="target_item" 
+                                                   placeholder="What are you planning to buy?"
+                                                   value="<%= activity.target_item || '' %>"
+                                                   <% if (activity.type !== 'purchase') { %>disabled<% } %>>
+                                            <div class="form-text">Specify the item you're saving money for or planning to purchase.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Timed Activity Fields (only for timed type activities) -->
+                                <div class="row" id="timedFieldsRow" <% if (activity.type !== 'timed') { %>style="display: none;"<% } %>>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="start_time" class="form-label">Start Time</label>
+                                            <input type="datetime-local" class="form-control" id="start_time" name="start_time" 
+                                                   value="<% if (activity.start_time) { %><%= activity.start_time.toString().slice(0, 16) %><% } %>"
+                                                   <% if (activity.type !== 'timed') { %>disabled<% } %>>
+                                            <div class="form-text">When should this activity start?</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="end_time" class="form-label">End Time</label>
+                                            <input type="datetime-local" class="form-control" id="end_time" name="end_time" 
+                                                   value="<% if (activity.end_time) { %><%= activity.end_time.toString().slice(0, 16) %><% } %>"
+                                                   <% if (activity.type !== 'timed') { %>disabled<% } %>>
+                                            <div class="form-text">When should this activity end?</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="progress_percentage" class="form-label">Progress (%)</label>
+                                            <input type="number" min="0" max="100" class="form-control" id="progress_percentage" name="progress_percentage" 
+                                                   value="<%= activity.progress_percentage || 0 %>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <div class="form-check mt-4">
+                                                <input class="form-check-input" type="checkbox" id="is_completed" name="is_completed" 
+                                                       <%= activity.is_completed ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="is_completed">
+                                                    Mark as completed
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/activities/<%= activity.id %>" class="btn btn-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary">Update Activity</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Activity Info</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">Created:</small><br>
+                                <%= new Date(activity.created_at).toLocaleDateString() %>
+                            </div>
+                            <% if (activity.updated_at) { %>
+                            <div class="mb-3">
+                                <small class="text-muted">Last Updated:</small><br>
+                                <%= new Date(activity.updated_at).toLocaleDateString() %>
+                            </div>
+                            <% } %>
+                            <div class="mb-3">
+                                <small class="text-muted">Current Status:</small><br>
+                                <% if (activity.is_completed) { %>
+                                    <span class="badge bg-success">Completed</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning">In Progress</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('type');
+    const targetItemRow = document.getElementById('targetItemRow');
+    const targetItemInput = document.getElementById('target_item');
+    const timedFieldsRow = document.getElementById('timedFieldsRow');
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+
+    function toggleTypeSpecificFields() {
+        // Handle target item for purchase type
+        if (typeSelect.value === 'purchase') {
+            targetItemRow.style.display = 'block';
+            targetItemInput.removeAttribute('disabled');
+        } else {
+            targetItemRow.style.display = 'none';
+            targetItemInput.setAttribute('disabled', 'disabled');
+        }
+
+        // Handle timed fields for timed type
+        if (typeSelect.value === 'timed') {
+            timedFieldsRow.style.display = 'block';
+            startTimeInput.removeAttribute('disabled');
+            endTimeInput.removeAttribute('disabled');
+            startTimeInput.setAttribute('required', 'required');
+            endTimeInput.setAttribute('required', 'required');
+        } else {
+            timedFieldsRow.style.display = 'none';
+            startTimeInput.setAttribute('disabled', 'disabled');
+            endTimeInput.setAttribute('disabled', 'disabled');
+            startTimeInput.removeAttribute('required');
+            endTimeInput.removeAttribute('required');
+        }
+    }
+
+    // Listen for changes
+    typeSelect.addEventListener('change', toggleTypeSpecificFields);
+
+    // Add validation for timed activities
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (typeSelect.value === 'timed') {
+            const startTime = new Date(startTimeInput.value);
+            const endTime = new Date(endTimeInput.value);
+            
+            if (startTime >= endTime) {
+                e.preventDefault();
+                alert('End time must be after start time!');
+                return false;
+            }
+        }
+    });
+});
+</script>
+
+<%- include('../partials/footer') %>

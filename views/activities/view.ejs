@@ -1,0 +1,378 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0"><%= activity.title %></h1>
+                <div class="btn-group">
+                    <a href="/activities/<%= activity.id %>/edit" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a href="/activities" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Status:</strong></div>
+                                <div class="col-sm-9">
+                                    <% if (activity.is_completed) { %>
+                                        <span class="badge bg-success">Completed</span>
+                                    <% } else { %>
+                                        <span class="badge bg-warning">In Progress</span>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Type:</strong></div>
+                                <div class="col-sm-9">
+                                    <span class="badge bg-info"><%= activity.type %></span>
+                                </div>
+                            </div>
+
+                            <% if (activity.description) { %>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Description:</strong></div>
+                                <div class="col-sm-9"><%= activity.description %></div>
+                            </div>
+                            <% } %>
+
+                            <% if (activity.category) { %>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Category:</strong></div>
+                                <div class="col-sm-9"><%= activity.category %></div>
+                            </div>
+                            <% } %>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Priority:</strong></div>
+                                <div class="col-sm-9">
+                                    <% if (activity.priority === 'urgent') { %>
+                                        <span class="badge bg-danger">Urgent</span>
+                                    <% } else if (activity.priority === 'high') { %>
+                                        <span class="badge bg-warning">High</span>
+                                    <% } else if (activity.priority === 'medium') { %>
+                                        <span class="badge bg-info">Medium</span>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary">Low</span>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <% if (activity.due_date) { %>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Due Date:</strong></div>
+                                <div class="col-sm-9">
+                                    <%= new Date(activity.due_date).toLocaleDateString() %>
+                                    <%= new Date(activity.due_date).toLocaleTimeString() %>
+                                </div>
+                            </div>
+                            <% } %>
+
+                            <% if (activity.type === 'timed' && activity.start_time && activity.end_time) { %>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Start Time:</strong></div>
+                                <div class="col-sm-9">
+                                    <%= new Date(activity.start_time).toLocaleDateString() %>
+                                    <%= new Date(activity.start_time).toLocaleTimeString() %>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>End Time:</strong></div>
+                                <div class="col-sm-9">
+                                    <%= new Date(activity.end_time).toLocaleDateString() %>
+                                    <%= new Date(activity.end_time).toLocaleTimeString() %>
+                                </div>
+                            </div>
+                            <% } %>
+
+                            <% if (activity.total_amount && activity.total_amount > 0) { %>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Amount:</strong></div>
+                                <div class="col-sm-9">$<%= parseFloat(activity.total_amount || 0).toFixed(2) %></div>
+                            </div>
+                            <% } %>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Progress:</strong></div>
+                                <div class="col-sm-9">
+                                    <% 
+                                        let timeProgressText = '0%';
+                                        let displayProgress = activity.progress_percentage || 0;
+                                        let progressColor = 'bg-secondary';
+                                        let timeLeft = null;
+                                        
+                                        // For timed activities, use start_time and end_time
+                                        if (activity.type === 'timed' && activity.start_time && activity.end_time) {
+                                            const now = new Date();
+                                            const startTime = new Date(activity.start_time);
+                                            const endTime = new Date(activity.end_time);
+                                            const totalDuration = endTime - startTime;
+                                            const elapsed = now - startTime;
+                                            timeLeft = endTime - now;
+                                            
+                                            if (now < startTime) {
+                                                displayProgress = 0;
+                                                progressColor = 'bg-secondary';
+                                                timeProgressText = 'Not started yet';
+                                            } else if (now > endTime) {
+                                                displayProgress = 100;
+                                                progressColor = activity.is_completed ? 'bg-success' : 'bg-danger';
+                                                timeProgressText = 'Time expired';
+                                            } else {
+                                                displayProgress = Math.round((elapsed / totalDuration) * 100);
+                                                progressColor = 'bg-warning';
+                                                
+                                                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                                                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                                
+                                                let timeDisplay = '';
+                                                if (days > 0) timeDisplay += `${days}d `;
+                                                if (hours > 0) timeDisplay += `${hours}h `;
+                                                if (minutes > 0) timeDisplay += `${minutes}m`;
+                                                if (!timeDisplay) timeDisplay = '<1m';
+                                                
+                                                timeProgressText = timeDisplay + ' remaining';
+                                            }
+                                        }
+                                        // For all other activities, use created_at and due_date for time calculation
+                                        else if (activity.due_date) {
+                                            const now = new Date();
+                                            const createdDate = new Date(activity.created_at);
+                                            const dueDate = new Date(activity.due_date);
+                                            const totalDuration = dueDate - createdDate;
+                                            const elapsed = now - createdDate;
+                                            timeLeft = dueDate - now;
+                                            
+                                            if (timeLeft > 0) {
+                                                // Calculate time-based progress percentage
+                                                displayProgress = Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
+                                                
+                                                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                                                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                                
+                                                if (days > 0) {
+                                                    timeProgressText = `${days}d ${hours}h ${minutes}m remaining (${displayProgress}%)`;
+                                                } else if (hours > 0) {
+                                                    timeProgressText = `${hours}h ${minutes}m remaining (${displayProgress}%)`;
+                                                } else if (minutes > 0) {
+                                                    timeProgressText = `${minutes}m remaining (${displayProgress}%)`;
+                                                } else {
+                                                    timeProgressText = `<1m remaining (${displayProgress}%)`;
+                                                }
+                                                
+                                                if (displayProgress >= 75) {
+                                                    progressColor = 'bg-warning'; // Getting close to deadline
+                                                } else if (displayProgress >= 50) {
+                                                    progressColor = 'bg-info';
+                                                } else {
+                                                    progressColor = 'bg-primary';
+                                                }
+                                            } else {
+                                                displayProgress = 100;
+                                                progressColor = activity.is_completed ? 'bg-success' : 'bg-danger';
+                                                timeProgressText = 'Overdue';
+                                            }
+                                        } else {
+                                            // Fallback to manual progress percentage
+                                            timeProgressText = displayProgress + '%';
+                                            if (displayProgress >= 75) { 
+                                                progressColor = 'bg-success'; 
+                                            } else if (displayProgress >= 50) { 
+                                                progressColor = 'bg-info'; 
+                                            } else if (displayProgress >= 25) { 
+                                                progressColor = 'bg-warning'; 
+                                            }
+                                        }
+                                    %>
+                                    
+                                    <div class="mb-2">
+                                        <small class="fw-bold <%= timeLeft !== null && timeLeft <= 0 ? 'text-danger' : 'text-info' %>">
+                                            <%= timeProgressText %>
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="progress">
+                                        <div class="progress-bar <%= progressColor %>" role="progressbar" 
+                                             style="width: <%= displayProgress %>%"
+                                             aria-valuenow="<%= displayProgress %>" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                            <%= displayProgress %>%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Created:</strong></div>
+                                <div class="col-sm-9"><%= new Date(activity.created_at).toLocaleDateString() %></div>
+                            </div>
+
+                            <% if (activity.updated_at) { %>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Last Updated:</strong></div>
+                                <div class="col-sm-9"><%= new Date(activity.updated_at).toLocaleDateString() %></div>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <% if (!activity.is_completed) { %>
+                                <form action="/activities/<%= activity.id %>/complete" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-check-circle me-1"></i>Mark Complete
+                                    </button>
+                                </form>
+                                <% } else { %>
+                                <form action="/activities/<%= activity.id %>/incomplete" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Mark Incomplete
+                                    </button>
+                                </form>
+                                <% } %>
+                                
+                                <a href="/activities/<%= activity.id %>/edit" class="btn btn-outline-primary">
+                                    <i class="bi bi-pencil me-1"></i>Edit Activity
+                                </a>
+                                
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash me-1"></i>Delete Activity
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Activity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this activity? This action cannot be undone.</p>
+                <p><strong><%= activity.title %></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="/activities/<%= activity.id %>/delete" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add time-progress-text class to the progress text element
+    const progressTextElement = document.querySelector('.fw-bold');
+    if (progressTextElement) {
+        progressTextElement.classList.add('time-progress-text');
+    }
+    
+    // Real-time countdown for time-based activities
+    function updateTimeProgress() {
+        const activityType = '<%= activity.type %>';
+        const startTime = '<%= activity.start_time %>';
+        const endTime = '<%= activity.end_time %>';
+        const dueDate = '<%= activity.due_date %>';
+        const createdAt = '<%= activity.created_at %>';
+        
+        const progressTextElement = document.querySelector('.time-progress-text');
+        const progressBarElement = document.querySelector('.progress-bar');
+        
+        if (!progressTextElement || !progressBarElement) return;
+        
+        const now = new Date();
+        
+        if (activityType === 'timed' && startTime && endTime) {
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+            const timeLeft = end - now;
+            
+            if (timeLeft > 0) {
+                const totalDuration = end - start;
+                const elapsed = now - start;
+                const displayProgress = Math.round((elapsed / totalDuration) * 100);
+                
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                
+                let timeDisplay = '';
+                if (days > 0) timeDisplay += `${days}d `;
+                if (hours > 0) timeDisplay += `${hours}h `;
+                if (minutes > 0) timeDisplay += `${minutes}m`;
+                if (!timeDisplay) timeDisplay = '<1m';
+                
+                progressTextElement.textContent = timeDisplay + ' remaining';
+                progressTextElement.className = 'fw-bold text-info time-progress-text';
+                progressBarElement.style.width = displayProgress + '%';
+                progressBarElement.textContent = displayProgress + '%';
+            } else {
+                progressTextElement.textContent = 'Time expired';
+                progressTextElement.className = 'fw-bold text-danger time-progress-text';
+                progressBarElement.style.width = '100%';
+                progressBarElement.className = 'progress-bar bg-danger';
+            }
+        } else if (dueDate) {
+            const created = new Date(createdAt);
+            const due = new Date(dueDate);
+            const timeLeft = due - now;
+            
+            if (timeLeft > 0) {
+                const totalDuration = due - created;
+                const elapsed = now - created;
+                const displayProgress = Math.max(0, Math.min(100, Math.round((elapsed / totalDuration) * 100)));
+                
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                
+                if (days > 0) {
+                    progressTextElement.textContent = `${days}d ${hours}h ${minutes}m remaining (${displayProgress}%)`;
+                } else if (hours > 0) {
+                    progressTextElement.textContent = `${hours}h ${minutes}m remaining (${displayProgress}%)`;
+                } else if (minutes > 0) {
+                    progressTextElement.textContent = `${minutes}m remaining (${displayProgress}%)`;
+                } else {
+                    progressTextElement.textContent = `<1m remaining (${displayProgress}%)`;
+                }
+                
+                progressBarElement.style.width = displayProgress + '%';
+                progressBarElement.textContent = displayProgress + '%';
+            }
+        }
+    }
+    
+    // Update immediately and then every minute
+    updateTimeProgress();
+    setInterval(updateTimeProgress, 60000);
+});
+</script>
+
+<%- include('../partials/footer') %>

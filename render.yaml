@@ -1,0 +1,37 @@
+services:
+  # 1. Notifai space Backend API Web Service
+  - type: web
+    name: notifai-space-api
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false # Set in Render Dashboard with your Neon DB PostgreSQL connection string
+      - key: JWT_SECRET
+        generateValue: true
+      - key: EMAIL_HOST
+        value: mail.benix.space
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: FLW_PUBLIC_KEY
+        sync: false
+      - key: FLW_SECRET_KEY
+        sync: false
+      - key: FLW_SECRET_HASH
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@notifai.space
+      - key: ADMIN_PASSWORD
+        sync: false
