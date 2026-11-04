@@ -3,24 +3,38 @@
   "version": "2.0.0",
   "description": "Notifai space - Smart Activity & Task Management with Neon DB, Flutterwave, React, and React Native",
   "scripts": {
-    "setup": "npm --prefix backend install && npm --prefix web install",
+    "build": "cd web && npm install && npm run build",
+    "start": "node backend/src/server.js",
     "dev:backend": "cd backend && npm start",
     "dev:web": "cd web && npm run dev",
     "dev:mobile": "cd mobile && npm start",
     "db:setup": "cd backend && npm run db:setup",
     "test:reminders": "cd backend && npm run test:reminders"
   },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "expo-server-sdk": "^3.13.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.10.0",
+    "pg": "^8.13.1",
+    "uuid": "^11.0.5",
+    "web-push": "^3.6.7"
+  },
   "keywords": [
     "notifai",
     "tasks",
-    "activity-manager",
     "neon-db",
     "postgresql",
     "flutterwave",
     "react",
     "react-native",
-    "expo",
-    "render"
+    "expo"
   ],
   "author": "Notifai space Team",
   "license": "MIT"

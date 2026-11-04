@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "cd web && npm install && npm run build",
+  "outputDirectory": "web/dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -7,7 +9,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/web/$1"
+      "destination": "/$1"
     }
   ]
 }
